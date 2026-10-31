@@ -87,13 +87,12 @@ a browser. There are no network requests: everything is local. Use the
   - Key elements: `[data-testid="phase-progress"]`,
     `[data-testid="phase-goal"]`, `[data-testid="week-note"]`.
   - Network: none.
-- Fun advancement checklist and Advance: done. Screen: levels card.
-  - Web test reference: check every checklist item, then Advance.
-  - Expected behavior: Advance stays disabled until every checklist
-    item is confirmed and 6 sessions are logged. Advancing moves to the
-    next level with a confirmation message. No medical gating.
-  - Key elements: `[data-testid="checklist-items"]`,
-    `[data-testid="checklist-item"]`, `[data-testid="btn-advance"]`,
+- Advance after 6 sessions: done. Screen: levels card.
+  - Web test reference: log 6 sessions, then Advance.
+  - Expected behavior: Advance stays disabled until 6 sessions are
+    logged. Advancing moves to the next level with a confirmation
+    message. No checklist, no medical gating.
+  - Key elements: `[data-testid="btn-advance"]`,
     `[data-testid="advance-note"]`.
   - Network: none.
 

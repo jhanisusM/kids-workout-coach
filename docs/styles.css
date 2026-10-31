@@ -184,10 +184,7 @@ h1 { font-size: clamp(2rem, 5vw, 3.6rem); letter-spacing: -.03em; margin: 0 0 10
 .phase-progress { display: grid; gap: 6px; margin-bottom: 14px; font-size: .88rem; }
 .phase-row { display: flex; justify-content: space-between; gap: 10px; }
 .phase-row .done { color: var(--green); font-weight: 700; }
-.checklist { border-top: 1px solid var(--line); padding-top: 14px; }
-.checklist h3 { margin: 0 0 6px; font-size: .95rem; }
-.check-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; cursor: pointer; font-size: .9rem; }
-.check-item input { width: 22px; height: 22px; margin-top: 1px; accent-color: var(--green); flex: 0 0 auto; }
+.advance { border-top: 1px solid var(--line); padding-top: 14px; }
 #advanceBtn { margin-top: 10px; }
 #advanceBtn:disabled { opacity: .5; cursor: not-allowed; }
 .week-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-bottom: 8px; }

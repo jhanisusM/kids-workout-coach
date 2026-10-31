@@ -30,7 +30,7 @@
           </button>
         </div>
       </div>
-      <p class="lede">A fun 3-level program for kids 5 and older: warm-up play, strong legs, and tall posture. Bodyweight only, with animal moves and holds. Move up a level after 6 sessions and the checklist.</p>
+      <p class="lede">A fun 3-level program for kids 5 and older: warm-up play, strong legs, and tall posture. Bodyweight only, with animal moves and holds. Move up a level after 6 sessions.</p>
       <p class="demo-badge">Kids app: progress is stored in this browser only. No names, no photos, no accounts.</p>
     </div>
     <div class="frequency"><span>Weekly rhythm</span><strong id="frequencyCount" data-testid="frequency-count">2 workout days</strong></div>
@@ -51,13 +51,11 @@
     </div>
     <div class="phase-progress" id="phaseProgress" data-testid="phase-progress" aria-live="polite"></div>
     <p class="advice" id="symptomAdvice" hidden></p>
-    <div class="checklist" id="checklistWrap">
-      <h3 id="checklistTitle" data-testid="checklist-title">Before advancing, confirm every item</h3>
-      <div id="checklistItems" data-testid="checklist-items"></div>
+    <div class="advance" id="advanceWrap">
       <button class="btn" id="advanceBtn" type="button" data-testid="btn-advance">Advance to Level 2</button>
       <p class="muted small" id="advanceNote" data-testid="advance-note"></p>
     </div>
-    <p class="muted small">Moving back to an earlier level is always available. Moving up uses Advance, after 6 logged sessions and every checklist item. Changing level ends a running session, and you will be asked to confirm.</p>
+    <p class="muted small">Moving back to an earlier level is always available. Moving up uses Advance, after 6 logged sessions. Changing level ends a running session, and you will be asked to confirm.</p>
     <div class="prompt-bar danger" id="phaseConfirm" data-testid="phase-confirm">
       <span id="phaseConfirmText"><strong>Change level?</strong> This ends the current session and clears its checkboxes.</span>
       <span class="prompt-actions">

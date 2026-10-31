@@ -188,33 +188,7 @@ const PHASES = [
   },
 ];
 
-/* Shared checks stay on the same ids so older saves still match.
- * Level 1 adds frog squats and wall sit without rushing. Level 2 adds
- * plank and superman with good shape. Level 3 adds finishing the whole
- * Superhero level. Fun checks only, no medical gating. */
-const SHARED_CHECKLIST = [
-  { id: 'all-moves', label: 'Finished every move in the session' },
-  { id: 'tall-back', label: 'Kept my back tall during posture moves' },
-  { id: 'told-grownup', label: 'Stopped and told a grown-up if anything hurt' },
-];
-
-const PHASE_CHECKLISTS = {
-  1: SHARED_CHECKLIST.concat([
-    { id: 'frog-and-wall', label: 'Did frog squats and wall sit without rushing' },
-  ]),
-  2: SHARED_CHECKLIST.concat([
-    { id: 'super-hold', label: 'Held plank and superman with good shape' },
-  ]),
-  3: SHARED_CHECKLIST.concat([
-    { id: 'superhero-finish', label: 'Finished the whole Superhero level' },
-  ]),
-};
-
 const EXERCISE_BY_ID = new Map(EXERCISES.map(e => [e.id, e]));
-
-function checklistForPhase(phaseId) {
-  return PHASE_CHECKLISTS[normalizePhase(phaseId)] || null;
-}
 
 /* Resolve a phase into its concrete program. `week` selects doses[week]
  * when that entry exists; otherwise the phase dose, then the catalog dose. */
@@ -471,12 +445,6 @@ function applyPhaseChange(state, nextPhase) {
   state.checks = {};
   return state;
 }
-function checklistReady(checklist, phaseId) {
-  const items = checklistForPhase(phaseId);
-  if (!items || !items.length) return false;
-  const c = (checklist && checklist[String(phaseId)]) || {};
-  return items.every(item => c[item.id] === true);
-}
 /* Kids version: no medical symptom gating. All sessions count. */
 function symptomFlagged(record) {
   return false;
@@ -520,7 +488,6 @@ function advanceDecision(state) {
   if (phase >= 3) return { ok: false, reason: 'last-phase' };
   const have = Math.max(0, Math.floor(Number(state.phaseSessions && state.phaseSessions[phase]) || 0));
   if (have < SESSIONS_PER_PHASE) return { ok: false, reason: 'sessions', have: have, need: SESSIONS_PER_PHASE };
-  if (!checklistReady(state.checklist, phase)) return { ok: false, reason: 'checklist' };
   if (consecutiveFlagLock(state, phase)) return { ok: false, reason: 'symptoms' };
   return { ok: true, next: phase + 1 };
 }
@@ -541,13 +508,12 @@ function grantAdvance(state, at) {
   return { ok: true, from: from, to: decision.next };
 }
 function advanceReason(decision) {
-  if (!decision || decision.ok) return 'Checklist complete and 9 sessions logged. Advance when you are ready.';
+  if (!decision || decision.ok) return '6 sessions logged. Advance when you are ready.';
   if (decision.reason === 'sessions') {
     const have = Math.max(0, Math.floor(Number(decision.have) || 0));
     if (have >= SESSIONS_PER_PHASE) return 'This level has reached 6 of 6 sessions.';
     return 'Logged ' + have + ' of 6 sessions in this level. Advance stays off until you reach 6.';
   }
-  if (decision.reason === 'checklist') return 'Confirm every checklist item before advancing.';
   if (decision.reason === 'symptoms') {
     return 'Advance is paused. Ask a grown-up before moving on.';
   }
@@ -574,7 +540,6 @@ function defaultStore(now) {
     activeDay: dayKey(today),
     phase: 1,
     phaseSessions: { 1: 0, 2: 0, 3: 0 },
-    checklist: {},
     unlockedPhase: 1,
     symptoms: {},
     history: [],
@@ -629,20 +594,6 @@ function sanitizeCompletions(raw, present) {
     if (!raw[key]) return;
     if (!isDayKey(key)) { repaired = true; return; }
     out[key] = true;
-  });
-  return { value: out, repaired: repaired };
-}
-function sanitizeChecklist(raw, present) {
-  if (!present) return { value: {}, repaired: false };
-  if (!isPlainObject(raw)) return { value: {}, repaired: true };
-  const out = {};
-  let repaired = false;
-  Object.keys(raw).forEach(phaseKey => {
-    const bucket = raw[phaseKey];
-    if (!isPlainObject(bucket)) { repaired = true; return; }
-    const clean = {};
-    Object.keys(bucket).forEach(item => { if (bucket[item]) clean[item] = true; });
-    out[phaseKey] = clean;
   });
   return { value: out, repaired: repaired };
 }
@@ -744,20 +695,19 @@ function migrate(raw, now) {
   const checksInfo = sanitizeFlagMap(raw.checks, hasOwn(raw, 'checks'));
   const collapsedInfo = sanitizeFlagMap(raw.collapsed, hasOwn(raw, 'collapsed'));
   const completionsInfo = sanitizeCompletions(raw.completions, hasOwn(raw, 'completions'));
-  const checklistInfo = sanitizeChecklist(raw.checklist, hasOwn(raw, 'checklist'));
   const dayInfo = sanitizeActiveDay(raw.activeDay, hasOwn(raw, 'activeDay'), today);
   const daysInfo = sanitizeWorkoutDays(raw.workoutDays, hasOwn(raw, 'workoutDays'), raw.thirdDay);
   const sessionInfo = sanitizeSession(raw.session, hasOwn(raw, 'session'));
   const symptomsInfo = sanitizeSymptoms(raw.symptoms, hasOwn(raw, 'symptoms'));
   const historyInfo = sanitizeHistory(raw.history, hasOwn(raw, 'history'));
 
-  [checksInfo, collapsedInfo, completionsInfo, checklistInfo, dayInfo, daysInfo, sessionInfo, symptomsInfo, historyInfo].forEach(info => {
+  [checksInfo, collapsedInfo, completionsInfo, dayInfo, daysInfo, sessionInfo, symptomsInfo, historyInfo].forEach(info => {
     if (info.repaired) repaired = true;
   });
   if (daysInfo.changed) changed = true;
   if (hasOwn(raw, 'thirdDay') || hasOwn(raw, 'clearance')) changed = true;
   if (!hasOwn(raw, 'checks') || !hasOwn(raw, 'collapsed') || !hasOwn(raw, 'completions') ||
-      !hasOwn(raw, 'checklist') || !hasOwn(raw, 'activeDay') || !hasOwn(raw, 'workoutDays') ||
+      !hasOwn(raw, 'activeDay') || !hasOwn(raw, 'workoutDays') ||
       !hasOwn(raw, 'session') || !hasOwn(raw, 'symptoms') || !hasOwn(raw, 'history')) {
     changed = true;
   }
@@ -774,7 +724,6 @@ function migrate(raw, now) {
       activeDay: dayInfo.value,
       phase: phase,
       phaseSessions: sessionsInfo.value,
-      checklist: checklistInfo.value,
       unlockedPhase: unlocked,
       symptoms: symptomsInfo.value,
       history: historyInfo.value,
@@ -1038,11 +987,6 @@ function confirmClear() {
 }
 
 /* ---------------- Level actions ---------------- */
-function checklistConfirmed(phaseId) {
-  const items = checklistForPhase(phaseId) || [];
-  const c = store.checklist[String(phaseId)] || {};
-  return items.map(i => ({ id: i.id, label: i.label, confirmed: c[i.id] === true }));
-}
 function commitPhase(n, successMessage) {
   const from = currentPhaseId();
   const priorUnlock = unlockedPhaseOf(store);
@@ -1080,15 +1024,6 @@ function cancelPhaseChange() {
   pendingPhaseMessage = null;
   pendingAdvance = false;
   renderPrompts();
-}
-function toggleChecklistItem(id, confirmed) {
-  const key = String(currentPhaseId());
-  const cur = Object.assign({}, store.checklist[key] || {});
-  if (confirmed) cur[id] = true;
-  else delete cur[id];
-  store.checklist[key] = cur;
-  save();
-  renderPhase();
 }
 function advancePhase() {
   const decision = advanceDecision(store);
@@ -1393,17 +1328,11 @@ function renderPhase() {
   }
   $('phaseProgress').innerHTML = prog;
 
-  const wrap = $('checklistWrap');
+  const wrap = $('advanceWrap');
   if (p >= 3) {
     wrap.hidden = true;
   } else {
     wrap.hidden = false;
-    const items = checklistConfirmed(p);
-    $('checklistTitle').textContent = 'Before moving to Level ' + (p + 1) + ', confirm every item';
-    $('checklistItems').innerHTML = items.map(it =>
-      '<label class="check-item"><input type="checkbox" data-checklist-item="' + it.id + '" data-testid="checklist-item"' +
-      (it.confirmed ? ' checked' : '') + '><span>' + esc(it.label) + '</span></label>'
-    ).join('');
     const decision = advanceDecision(store);
     const btn = $('advanceBtn');
     btn.disabled = !decision.ok;
@@ -1520,8 +1449,6 @@ function onClick(ev) {
 function onChange(ev) {
   const box = ev.target.closest('[data-check]');
   if (box) { toggleCheck(box.getAttribute('data-check')); return; }
-  const item = ev.target.closest('[data-checklist-item]');
-  if (item) { toggleChecklistItem(item.getAttribute('data-checklist-item'), item.checked); return; }
   const dayBox = ev.target.closest('[data-workout-day]');
   if (dayBox) {
     const dow = Number(dayBox.getAttribute('data-workout-day'));
@@ -1666,8 +1593,6 @@ if (typeof module !== 'undefined') {
     applyCompletion: applyCompletion,
     phaseChangeDecision: phaseChangeDecision,
     applyPhaseChange: applyPhaseChange,
-    checklistReady: checklistReady,
-    checklistForPhase: checklistForPhase,
     normalizePhase: normalizePhase,
     cappedSessionCount: cappedSessionCount,
     rawBackupKey: rawBackupKey,
