@@ -4,12 +4,13 @@ A guided 20-minute bodyweight workout for kids 5 and older. Stronger thighs,
 taller posture, fun holds and animal moves. Pure HTML, CSS, and JavaScript.
 No build step, no server, no accounts, no tracking. Progress lives in the
 browser's localStorage under the key `kids-coach-v1`. The demo video library
-is intentionally empty: no video URL has been invented, and a video is only
-added after it is opened and checked as kid friendly.
+holds the top verified pick per move (added 2026-10-31 at the user's
+request): no video URL has been invented, and a video is only added
+after it is opened and checked as kid friendly.
 
 How to test: open `index.html` (or the single-file preview built from it) in
-a browser. There are no network requests: everything is local. Use the
-`data-testid` selectors below, not class names or deep CSS paths.
+a browser. Everything is local except YouTube demo embeds and external
+demo links. Use the `data-testid` selectors below, not class names or deep CSS paths.
 
 ## Session
 
@@ -127,14 +128,14 @@ a browser. There are no network requests: everything is local. Use the
 
 ## Moves directory
 
-- All the moves, text steps only: done. Screen: moves directory.
+- All the moves, with demo videos: done. Screen: moves directory.
   - Web test reference: scroll to All the moves.
-  - Expected behavior: one card per move with its steps. No video links,
-    no invented URLs, no demo arrows, until a video is verified as kid
-    friendly.
+  - Expected behavior: one row per move; YouTube picks play inline via
+    youtube-nocookie embeds, and every move has a demo link on its card.
+    No invented URLs: every video was opened and checked as kid friendly.
   - Key elements: `[data-testid="demo-list"]`,
     `[data-testid="demo-row"]`.
-  - Network: none.
+  - Network: youtube-nocookie embeds and external demo links.
 
 ## Safety and privacy
 
