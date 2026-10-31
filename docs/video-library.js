@@ -40,22 +40,22 @@ const VIDEO_LIBRARY = {
       url: 'https://www.youtube.com/shorts/SoM7xC60Loc'
     },
     {
-      id: 'v-sammy-frog-squats',
+      id: 'v-yoga-everyday-frog-squats',
       topic: 'kids-moves',
-      title: 'Frog squats',
-      creator: 'Sammy and Sonna',
+      title: 'Magical Forest Yoga Adventure',
+      creator: 'Yoga Everyday',
       handle: '',
-      description: 'Animated frog squats clip. Note: the clip carries a site watermark throughout.',
-      url: 'https://www.instagram.com/reel/Ddm1WwpRBLQ/'
+      description: 'Kids yoga routine that includes "The Jumping Green Frog (Squats)" chapter at 5:01, not a dedicated frog squat demo.',
+      url: 'https://www.youtube.com/watch?v=90xK36ZlvYs'
     },
     {
-      id: 'v-trevorrow-wall-sit',
+      id: 'v-howcast-wall-sit',
       topic: 'kids-moves',
-      title: 'Wall sit',
-      creator: 'Joshua Trevorrow',
+      title: 'How to Do a Wall Sit',
+      creator: 'Howcast',
       handle: '',
-      description: 'Wall sit demo.',
-      url: 'https://www.instagram.com/reel/Dav5QCYyiK9/'
+      description: 'Wall sit how-to video on the Howcast page.',
+      url: 'https://howcast.com/videos/509549-how-to-do-a-wall-sit-thighs-workout/'
     },
     {
       id: 'v-gmb-horse-stance',
