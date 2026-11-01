@@ -114,6 +114,16 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     `[data-testid="calendar-day"]`, `[data-testid="calendar-day-rest"]`,
     `[data-testid="cal-progress"]`.
   - Network: none.
+- Rest-day note jumps to the calendar: done. Screen: session panel.
+  - Web test reference: on a rest day with no session, tap the session
+    note.
+  - Expected behavior: the page scrolls to the Weekly calendar, where a
+    workout day can be picked. Picking a workout day, then Start, begins
+    a session. The note is only tappable for the rest-day case; session
+    lines for running, paused, or expired sessions are unchanged.
+  - Key elements: `[data-testid="session-date"]`,
+    `[data-testid="week-grid"]`.
+  - Network: none.
 - Settings, workout days: done. Screen: settings panel.
   - Web test reference: open Settings from the menu button, toggle days.
   - Expected behavior: picked days become workout days; at least one day

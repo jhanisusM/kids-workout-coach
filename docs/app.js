@@ -1121,11 +1121,16 @@ function renderTimer() {
   let detail = 'in progress';
   if (s && s.state === 'paused') detail = 'paused';
   else if (expired) detail = 'time is up';
-  $('sessionDate').textContent = s
-    ? 'Session: ' + prettyDay(s.day) + ' (' + detail + ')'
-    : restDay
-      ? 'This is a rest day. Tap a workout day on the calendar, then press Start.'
+  /* On a rest day with no session, the note itself jumps to the calendar:
+   * on phones the calendar sits below the whole routine, so tapping the
+   * note is the way to reach it instead of hunting for it. */
+  if (!s && restDay) {
+    $('sessionDate').innerHTML = 'This is a rest day. <button type="button" class="jump-link" data-jump-calendar>Tap here to jump to the calendar</button>, pick a workout day, then press Start.';
+  } else {
+    $('sessionDate').textContent = s
+      ? 'Session: ' + prettyDay(s.day) + ' (' + detail + ')'
       : 'No active session: pick a workout day and press Start.';
+  }
 }
 
 function renderProgress() {
@@ -1392,6 +1397,15 @@ function tick() {
 function onClick(ev) {
   if (ev.target.closest('[data-close-panel]')) {
     closePanels();
+    return;
+  }
+  const jump = ev.target.closest('[data-jump-calendar]');
+  if (jump) {
+    const grid = $('weekGrid');
+    if (grid && typeof grid.scrollIntoView === 'function') {
+      try { grid.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      catch (e) { /* ignore */ }
+    }
     return;
   }
   const secBtn = ev.target.closest('[data-section]');
