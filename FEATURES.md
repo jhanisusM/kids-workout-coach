@@ -3,10 +3,12 @@
 A guided 20-minute bodyweight workout for kids 5 and older. Stronger thighs,
 taller posture, fun holds and animal moves. Pure HTML, CSS, and JavaScript.
 No build step, no server, no accounts, no tracking. Progress lives in the
-browser's localStorage under the key `kids-coach-v1`. The demo video library
-holds the top verified pick per move (added 2026-10-31 at the user's
-request): no video URL has been invented, and a video is only added
-after it is opened and checked as kid friendly.
+browser's localStorage under the key `kids-coach-v1`. The exercise pool has
+18 moves; every session picks 5 of them at random (see Program below). The
+demo video library holds 17 verified video entries: no video URL has been
+invented, and a video is only added after it is opened and checked.
+Gorilla Squats is held out (unverified): it is not a programmed exercise
+and has no video entry.
 
 How to test: open `index.html` (or the single-file preview built from it) in
 a browser. Everything is local except YouTube demo embeds and external
@@ -25,9 +27,30 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     `[data-testid="btn-pause"]`, `[data-testid="btn-resume"]`,
     `[data-testid="session-date"]`, `[data-testid="status-text"]`.
   - Network: none.
+- Five random videos per session, locked until Finish or Clear: done.
+  Screen: dashboard and routine.
+  - Web test reference: press Start, note the 5 moves, reload the page,
+    then press Finish workout (or Clear session) and Start again.
+  - Expected behavior: pressing Start (fresh start only, not Resume)
+    picks 5 distinct exercise ids uniformly at random from the
+    18-exercise pool, in picked order, with catalog doses. The session's
+    program is exactly those 5: progress reads n / 5, and checking all 5
+    (not all 18) gates the Finish prompt. Reloading, pausing, resuming,
+    and timer expiry all keep the same 5: the ids are stored on the
+    session (`session.exerciseIds`) and carried over when a session
+    expires. Finish (completed) and Clear (cleared) end the session, so
+    the next Start generates a fresh random 5; repeats across sessions
+    are allowed by chance. A stored session from before this feature
+    (no `exerciseIds`) gets one fresh random 5 generated once and saved,
+    so it stays stable across renders and reloads. The timer stays
+    20 minutes and the storage key stays `kids-coach-v1`.
+  - Key elements: `[data-testid="progress-count"]`,
+    `[data-testid="status-count"]`, `[data-testid="exercise-check"]`,
+    `[data-testid="finish-confirm"]`, `[data-testid="btn-start"]`.
+  - Network: none.
 - Finish workout with star message: done. Screen: dashboard.
-  - Web test reference: check every exercise in a running session, then
-    press Finish workout.
+  - Web test reference: check every exercise in a running session (all 5
+    picked moves), then press Finish workout.
   - Expected behavior: a finish prompt appears once all moves are checked.
     Finishing logs the day once and shows a star message. No pain score, no
     swelling score, no volume cut, no next-morning check-in.
@@ -40,7 +63,8 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Expected behavior: an expiry prompt offers Log anyway or Discard.
     An expired session never traps the timer: Start stays visible, and
     pressing Start abandons the expired session without logging it and
-    starts a fresh 20:00 session with checkboxes reset. Checkboxes stay
+    starts a fresh 20:00 session with a fresh random 5 and checkboxes
+    reset. Expiry itself preserves the old session's 5 until then. Checkboxes stay
     until Log anyway, Discard, or a fresh Start.
   - Key elements: `[data-testid="expiry-confirm"]`,
     `[data-testid="btn-expire-log"]`, `[data-testid="btn-expire-discard"]`,
@@ -59,11 +83,16 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 ## Routine
 
 - Exercise checklist with big dose labels: done. Screen: routine.
-  - Web test reference: start a session, then check moves off.
-  - Expected behavior: 13 moves in Level 1 (warm-up play, strong legs,
-    tall posture, cool-down stretch), each with steps and a dose label.
-    Checking updates the counts to n / 13. Checkboxes are disabled before
-    a session starts, and the progress note says to start a session first.
+  - Web test reference: look at the routine before starting, then start
+    a session and check moves off.
+  - Expected behavior: with no session, the routine shows the full
+    18-exercise pool (warm-up play, strong legs, tall posture, cool-down
+    stretch), each with steps and a dose label, and progress reads
+    0 / 18 with the 'Start a session' note. During a session it shows
+    only the 5 picked moves, and checking updates the counts to n / 5.
+    Doses are the catalog doses in both cases: levels no longer override
+    them. Checkboxes are disabled before a session starts, and the
+    progress note says to start a session first.
   - Key elements: `[data-testid="routine"]`,
     `[data-testid="exercise-check"]`, `[data-testid="progress-count"]`,
     `[data-testid="progress-note"]`, `[data-testid="status-count"]`.
@@ -80,7 +109,11 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 - Level picker (Starter, Stronger, Superhero): done. Screen: levels card.
   - Web test reference: tap Level 2 or Level 3.
   - Expected behavior: the heading shows the level name (for example
-    Level 1: Starter). Changing level while a session runs asks for
+    Level 1: Starter). Levels count sessions only: Level 1's goal is
+    'Five random videos every session. Bodyweight only, with a grown-up
+    nearby.', Level 2's is 'Keep going: five new random videos every
+    session.', and Level 3's is 'Superhero sessions: five random videos
+    every time.' Changing level while a session runs asks for
     confirmation first. Locked levels say what to complete first.
   - Key elements: `[data-testid="phase-title"]`,
     `[data-testid="level-btn-1"]`, `[data-testid="level-btn-2"]`,
@@ -89,7 +122,9 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Network: none.
 - Progression, 6 sessions per level: done. Screen: levels card.
   - Web test reference: finish sessions and watch the per-level rows.
-  - Expected behavior: each level tracks sessions toward 6 of 6.
+  - Expected behavior: each level tracks sessions toward 6 of 6. The
+    level rows count sessions only; there are no per-level move lists
+    and no week-based dose changes anymore.
   - Key elements: `[data-testid="phase-progress"]`,
     `[data-testid="phase-goal"]`, `[data-testid="week-note"]`.
   - Network: none.
@@ -142,9 +177,22 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 - All the moves, with demo videos: done. Screen: moves directory.
   - Web test reference: scroll to All the moves.
-  - Expected behavior: one row per move; YouTube picks play inline via
-    youtube-nocookie embeds, and every move has a demo link on its card.
-    No invented URLs: every video was opened and checked as kid friendly.
+  - Expected behavior: one row per move for all 18 pool moves, backed by
+    17 library entries (Hopscotch and Step Jacks share one Little Sports
+    video). YouTube watch-URL picks play inline via youtube-nocookie
+    embeds; the 4 Shorts picks (Bear Crawls, Frog Jumps, Star Jumps,
+    Crab Walk) show as demo links on the routine card only,
+    with no embed, and in All the moves those rows show the move name
+    only. Every move has a demo link on its routine card. No invented
+    URLs and no search-result URLs: every video was opened and checked.
+    Chapter and segment notes apply where a video is shared or excerpted:
+    Hopscotch at 0:00 and Step Jacks at 0:25 in the Little Sports video;
+    Donkey Kicks Left at 6:56 and Right at 7:48 in the Little Sports
+    compilation; Child's Pose at 3:35 in the Flow and Grow yoga video;
+    Windmills as the first move in its Little Sports video. High Knees
+    is flagged as the weakest pick: its demo is from XHIT Daily, an
+    adult fitness channel, not kid-specific. Gorilla Squats is held out
+    and appears nowhere as a programmed exercise.
   - Key elements: `[data-testid="demo-list"]`,
     `[data-testid="demo-row"]`.
   - Network: youtube-nocookie embeds and external demo links.

@@ -20,88 +20,117 @@ const SECTIONS = [
   { id: 'cooldown',  title: 'Cool-down Stretch',           block: 'foundation' },
 ];
 
-/* Placeholder doses. The prompt was truncated before any set, rep, hold, or
- * week progression, so every dose string in this catalog is a stand-in
- * pending the PT's full program. */
+/* Kid play doses below were assigned by the coordinator, not the user;
+ * the user can correct any dose. Sections use the existing section ids. */
 const EXERCISES = [
-  { id: 'march-in-place', section: 'warmup',
-    name: 'March in place',
-    note: 'Lift your knees high and swing your arms. Smile and march like a parade.',
+  { id: 'hopscotch', section: 'warmup',
+    name: 'Hopscotch',
+    note: 'Hop forward on one foot, then land on two feet, repeating to warm up the body.',
     dose: '1 min', muscle_groups: ['legs', 'warm-up'],
-    demo_ids: ['v-bodycoach-kids-move'],
-    video_url: 'https://www.youtube.com/watch?v=d3LPrhI0v-w' },
-  { id: 'frog-jumps-small', section: 'warmup',
-    name: 'Little frog jumps',
-    note: 'Squat low like a frog, jump a little, and land soft with bent knees.',
-    dose: '8 jumps', muscle_groups: ['thighs', 'jumping'],
-    demo_ids: ['v-kidsfitmotion-shorts'],
-    video_url: '' },
-  { id: 'star-jumps', section: 'warmup',
-    name: 'Star jumps',
-    note: 'Jump up and spread your arms and legs like a star, then land soft.',
-    dose: '10 jumps', muscle_groups: ['whole body', 'jumping'],
-    demo_ids: ['v-bodycoach-kids-move'],
-    video_url: 'https://www.youtube.com/watch?v=d3LPrhI0v-w' },
-  { id: 'frog-squats', section: 'strength',
-    name: 'Frog squats',
-    note: 'Feet wide, squat low like a frog, then stand tall. Keep your chest up.',
-    dose: '2 x 8', muscle_groups: ['thighs'],
-    demo_ids: ['v-yoga-everyday-frog-squats'],
-    video_url: 'https://www.youtube.com/watch?v=90xK36ZlvYs' },
-  { id: 'wall-sit', section: 'strength',
-    name: 'Wall sit hold',
-    note: 'Back flat on the wall, slide down a little, and hold like a chair. Stop if your legs feel wobbly.',
-    dose: '3 x 15 sec', muscle_groups: ['thighs', 'isometric'],
-    demo_ids: ['v-howcast-wall-sit'],
-    video_url: '' },
-  { id: 'horse-stance', section: 'strength',
-    name: 'Horse stance hold',
-    note: 'Feet wide, knees bent a little, back tall. Hold strong like a horse rider.',
-    dose: '3 x 15 sec', muscle_groups: ['thighs', 'isometric'],
-    demo_ids: ['v-gmb-horse-stance'],
-    video_url: '' },
-  { id: 'glute-bridge-hold', section: 'strength',
-    name: 'Glute bridge hold',
-    note: 'Lie on your back, feet flat, lift your hips up and hold. Squeeze like you are holding a coin.',
-    dose: '3 x 10 sec', muscle_groups: ['thighs', 'hips', 'isometric'],
-    demo_ids: ['v-catalyst-glute-bridge'],
-    video_url: '' },
-  { id: 'bear-crawl', section: 'strength',
-    name: 'Bear crawl',
-    note: 'Hands and feet on the floor, knees off the floor, crawl across the room and back.',
+    demo_ids: ['v-little-sports-easy20'],
+    video_url: 'https://www.youtube.com/watch?v=1ZDXv_73zJ8' },
+  { id: 'step-jacks', section: 'warmup',
+    name: 'Step Jacks',
+    note: 'Step side to side while raising arms, acting as a lower-impact jumping jack without the jump.',
+    dose: '1 min', muscle_groups: ['whole body', 'warm-up'],
+    demo_ids: ['v-little-sports-easy20'],
+    video_url: 'https://www.youtube.com/watch?v=1ZDXv_73zJ8' },
+  { id: 'high-knees', section: 'warmup',
+    name: 'High Knees',
+    note: 'March or jog in place while bringing your knees up as high as you can toward your chest.',
+    dose: '30 sec', muscle_groups: ['legs', 'warm-up'],
+    demo_ids: ['v-xhit-high-knee'],
+    video_url: 'https://www.youtube.com/watch?v=oDdkytliOqE' },
+  { id: 'running-in-place', section: 'warmup',
+    name: 'Running in Place',
+    note: 'Run as fast as you can while staying in exactly the same spot.',
+    dose: '1 min', muscle_groups: ['legs', 'warm-up'],
+    demo_ids: ['v-bugururia-komodo-run'],
+    video_url: 'https://www.youtube.com/watch?v=PMRR8ds3Ho4' },
+  { id: 'invisible-jump-rope', section: 'warmup',
+    name: 'Invisible Jump Rope',
+    note: 'Keep feet together and jump up and down quickly while pretending to turn a jump rope with your hands.',
+    dose: '1 min', muscle_groups: ['whole body', 'warm-up'],
+    demo_ids: ['v-boardgains-invisible-rope'],
+    video_url: 'https://www.youtube.com/watch?v=bB_FpK_c_Oc' },
+  { id: 'windmills', section: 'warmup',
+    name: 'Windmills',
+    note: 'Stand with feet apart and arms out, bend down to touch your right hand to your left foot, stand up, and switch.',
+    dose: '10 reps', muscle_groups: ['whole body', 'warm-up'],
+    demo_ids: ['v-little-sports-windmills'],
+    video_url: 'https://www.youtube.com/watch?v=FB5-7tIiX-I' },
+  { id: 'arm-circles', section: 'warmup',
+    name: 'Arm Circles',
+    note: 'Hold arms straight out to the sides and draw small, then large, circles in the air forward and backward.',
+    dose: '10 each way', muscle_groups: ['shoulders', 'warm-up'],
+    demo_ids: ['v-allina-arm-burners'],
+    video_url: 'https://www.youtube.com/watch?v=eUHmwH5arHI' },
+  { id: 'bear-crawls', section: 'strength',
+    name: 'Bear Crawls',
+    note: 'Start with wrists under shoulders and knees off the floor, then crawl forward by moving the left hand and right leg together.',
     dose: '2 times across', muscle_groups: ['thighs', 'arms', 'core'],
-    demo_ids: ['v-kidsfitmotion-shorts'],
+    demo_ids: ['v-crossrope-bear-crawl'],
     video_url: '' },
-  { id: 'plank-knees', section: 'stability',
-    name: 'Plank on knees hold',
-    note: 'On your knees and hands, make a straight line from head to knees. Breathe and hold.',
-    dose: '3 x 15 sec', muscle_groups: ['posture', 'core', 'isometric'],
-    demo_ids: ['v-simplyyoung-plank-knees'],
-    video_url: 'https://www.youtube.com/watch?v=4HQoS-Z3rWU' },
-  { id: 'superman-hold', section: 'stability',
-    name: 'Superman hold',
-    note: 'Lie on your tummy, lift your arms and legs like you are flying, and keep your head looking down.',
-    dose: '3 x 10 sec', muscle_groups: ['posture', 'back', 'isometric'],
-    demo_ids: ['v-catalyst-superman'],
-    video_url: 'https://www.youtube.com/watch?v=r7u7aofrP3g' },
-  { id: 'wall-angels', section: 'stability',
-    name: 'Wall angels',
-    note: 'Back on the wall, arms up like a snow angel, slide them down slow. Keep your back tall.',
-    dose: '2 x 8', muscle_groups: ['posture', 'shoulders'],
-    demo_ids: ['v-bodyfix-wall-angels'],
-    video_url: 'https://www.youtube.com/watch?v=B28zZ0QrIOI' },
+  { id: 'frog-jumps', section: 'strength',
+    name: 'Frog Jumps',
+    note: 'Squat down low, then jump up high just like a frog leaping across a pond to build strong legs.',
+    dose: '10 jumps', muscle_groups: ['thighs', 'jumping'],
+    demo_ids: ['v-nursedeon-frog-jump'],
+    video_url: '' },
+  { id: 'star-jumps', section: 'strength',
+    name: 'Star Jumps',
+    note: 'Squat down, explode into a jump, and spread your arms and legs wide in the air like a star.',
+    dose: '10 jumps', muscle_groups: ['whole body', 'jumping'],
+    demo_ids: ['v-funtobefit-star-jumps'],
+    video_url: '' },
+  { id: 'donkey-kicks', section: 'strength',
+    name: 'Donkey Kicks',
+    note: 'Get on your hands and knees, then kick one leg straight back and up toward the ceiling before switching.',
+    dose: '8 each side', muscle_groups: ['thighs', 'core'],
+    demo_ids: ['v-little-sports-donkey-kicks'],
+    video_url: 'https://www.youtube.com/watch?v=dK5RsKPJKYg' },
+  { id: 'crab-walk', section: 'strength',
+    name: 'Crab Walk',
+    note: 'Sit on the floor, put your hands behind you, lift your hips up, and walk forward and backward like a crab.',
+    dose: '2 times across', muscle_groups: ['arms', 'core', 'thighs'],
+    demo_ids: ['v-kidsfitmotion-crab-walk'],
+    video_url: '' },
+  { id: 'inchworm', section: 'strength',
+    name: 'Inchworm',
+    note: 'Stand up straight, reach down to the floor, walk your hands forward into a plank, and then walk your feet up to your hands.',
+    dose: '5 reps', muscle_groups: ['whole body', 'core'],
+    demo_ids: ['v-howcast-inchworm'],
+    video_url: 'https://www.youtube.com/watch?v=VSp0z7Mp5IU' },
+  { id: 'superkid', section: 'strength',
+    name: 'Superkid (Superman)',
+    note: 'Lie on your belly and lift your arms and legs off the ground at the same time, pretending to fly.',
+    dose: '3 x 10 sec', muscle_groups: ['back', 'core'],
+    demo_ids: ['v-impossible-superman'],
+    video_url: 'https://www.youtube.com/watch?v=9sxoMGjICK4' },
+  { id: 'flamingo-balance', section: 'stability',
+    name: 'Flamingo Balance',
+    note: 'Stand on one leg like a flamingo, holding the other foot behind you to stretch your thigh.',
+    dose: '3 x 15 sec each side', muscle_groups: ['posture', 'balance'],
+    demo_ids: ['v-spaceninja-flamingo'],
+    video_url: 'https://www.youtube.com/watch?v=iJvhUhtvUwU' },
   { id: 'butterfly-stretch', section: 'cooldown',
-    name: 'Butterfly stretch',
-    note: 'Sit tall, feet together, knees out like butterfly wings. Breathe slow.',
+    name: 'Butterfly Stretch',
+    note: 'Sit down, bring the soles of your feet together, and gently flap your knees like butterfly wings.',
     dose: '30 sec', muscle_groups: ['stretch'],
     demo_ids: ['v-wufshanti-butterfly'],
     video_url: 'https://www.youtube.com/watch?v=Z47WQylFRmM' },
-  { id: 'tall-stretch', section: 'cooldown',
-    name: 'Tall stretch',
-    note: 'Reach your arms high to the sky, stand on tiptoes if you want, then relax.',
+  { id: 'childs-pose', section: 'cooldown',
+    name: "Child's Pose",
+    note: 'Kneel down, sit back on your heels, and reach your arms far forward on the floor to stretch your back.',
     dose: '30 sec', muscle_groups: ['stretch', 'posture'],
-    demo_ids: ['v-luna-tall-giraffe'],
-    video_url: 'https://www.youtube.com/watch?v=VutXpPte0r0' },
+    demo_ids: ['v-flowgrow-childs-pose'],
+    video_url: 'https://www.youtube.com/watch?v=Gj6xIWML8m0' },
+  { id: 'deep-breathing', section: 'cooldown',
+    name: 'Deep Breathing',
+    note: 'Take a deep breath in while raising your arms up, and blow it out slowly while lowering them.',
+    dose: '5 breaths', muscle_groups: ['stretch'],
+    demo_ids: ['v-kidsyogastories-balloon-breath'],
+    video_url: 'https://www.youtube.com/watch?v=DVwWcUNWwyU' },
 ];
 
 /* Resolve every exercise's demo_ids into full video objects from the video
@@ -114,11 +143,11 @@ EXERCISES.forEach(function (ex) {
   ex.demos = resolveDemoList(ex.demo_ids);
 });
 
-/* 3 levels, 6 sessions per level, about 3 sessions per week.
- * A level entry can override the catalog dose. Week doses change one
- * variable at a time. All moves are bodyweight only, for kids 5 and older,
- * with a grown-up nearby. Top verified demo videos were added 2026-10-31
- * at the user's request; every exercise links its top pick.
+/* 3 levels, 6 sessions per level. Levels count sessions only: they carry
+ * no exercise list and no dose overrides. Each session's program is 5
+ * random exercises picked at Start (see SESSION_PROGRAM_SIZE and
+ * programForState); doses are always the catalog doses. All moves are
+ * bodyweight only, for kids 5 and older, with a grown-up nearby.
  */
 const SESSIONS_PER_PHASE = 6;
 
@@ -127,100 +156,106 @@ const PHASES = [
     id: 1,
     name: 'Starter',
     weeks: 'Level 1',
-    goal: 'Fun warm-up, strong legs, and tall posture. Bodyweight only, with a grown-up nearby.',
-    exercises: [
-      { exercise_id: 'march-in-place' },
-      { exercise_id: 'frog-jumps-small' },
-      { exercise_id: 'star-jumps' },
-      { exercise_id: 'frog-squats' },
-      { exercise_id: 'wall-sit' },
-      { exercise_id: 'horse-stance' },
-      { exercise_id: 'glute-bridge-hold' },
-      { exercise_id: 'bear-crawl' },
-      { exercise_id: 'plank-knees' },
-      { exercise_id: 'superman-hold' },
-      { exercise_id: 'wall-angels' },
-      { exercise_id: 'butterfly-stretch' },
-      { exercise_id: 'tall-stretch' },
-    ],
+    goal: 'Five random videos every session. Bodyweight only, with a grown-up nearby.',
   },
   {
     id: 2,
     name: 'Stronger',
     weeks: 'Level 2',
-    goal: 'Longer holds and a few more reps. Same moves, stronger legs.',
-    exercises: [
-      { exercise_id: 'march-in-place' },
-      { exercise_id: 'frog-jumps-small', dose: '10 jumps' },
-      { exercise_id: 'star-jumps', dose: '12 jumps' },
-      { exercise_id: 'frog-squats', dose: '2 x 10' },
-      { exercise_id: 'wall-sit', dose: '3 x 20 sec' },
-      { exercise_id: 'horse-stance', dose: '3 x 20 sec' },
-      { exercise_id: 'glute-bridge-hold', dose: '3 x 15 sec' },
-      { exercise_id: 'bear-crawl', dose: '3 times across' },
-      { exercise_id: 'plank-knees', dose: '3 x 20 sec' },
-      { exercise_id: 'superman-hold', dose: '3 x 15 sec' },
-      { exercise_id: 'wall-angels', dose: '2 x 10' },
-      { exercise_id: 'butterfly-stretch' },
-      { exercise_id: 'tall-stretch' },
-    ],
+    goal: 'Keep going: five new random videos every session.',
   },
   {
     id: 3,
     name: 'Superhero',
     weeks: 'Level 3',
-    goal: 'The longest holds. You are a posture superhero.',
-    exercises: [
-      { exercise_id: 'march-in-place' },
-      { exercise_id: 'frog-jumps-small', dose: '12 jumps' },
-      { exercise_id: 'star-jumps', dose: '15 jumps' },
-      { exercise_id: 'frog-squats', dose: '3 x 8' },
-      { exercise_id: 'wall-sit', dose: '3 x 30 sec' },
-      { exercise_id: 'horse-stance', dose: '3 x 30 sec' },
-      { exercise_id: 'glute-bridge-hold', dose: '3 x 20 sec' },
-      { exercise_id: 'bear-crawl', dose: '3 times across' },
-      { exercise_id: 'plank-knees', dose: '3 x 30 sec' },
-      { exercise_id: 'superman-hold', dose: '3 x 20 sec' },
-      { exercise_id: 'wall-angels', dose: '3 x 8' },
-      { exercise_id: 'butterfly-stretch' },
-      { exercise_id: 'tall-stretch' },
-    ],
+    goal: 'Superhero sessions: five random videos every time.',
   },
 ];
 
 const EXERCISE_BY_ID = new Map(EXERCISES.map(e => [e.id, e]));
 
-/* Resolve a phase into its concrete program. `week` selects doses[week]
- * when that entry exists; otherwise the phase dose, then the catalog dose. */
-function resolvePhase(phaseId, week) {
-  const phase = PHASES.find(p => p.id === phaseId);
-  if (!phase) throw new Error('unknown phase: ' + phaseId);
-  const exercises = phase.exercises.map((entry, i) => {
-    const base = EXERCISE_BY_ID.get(entry.exercise_id);
-    if (!base) throw new Error('unknown exercise in phase ' + phaseId + ': ' + entry.exercise_id);
-    let note = entry.note !== undefined ? entry.note : base.note;
-    if (entry.note_append) note = note + ' ' + entry.note_append;
-    return {
-      id: base.id, section: base.section, name: base.name, note,
-      dose: doseForEntry(entry, base, week),
-      muscle_groups: base.muscle_groups, demos: base.demos, order: i,
-      video_url: typeof base.video_url === 'string' ? base.video_url : '',
-      loaded_knee_flexion: base.loaded_knee_flexion === true,
-    };
-  });
+/* Program resolution. The session program is exactly the 5 exercise ids
+ * stored on the session (session.exerciseIds), in picked order, with
+ * catalog doses. With no session, the program is the full 18-exercise
+ * pool, so the routine stays browseable before Start. resolvePhase keeps
+ * its old shape for callers that need level metadata, with the full pool
+ * as its exercises; it is not the session program. */
+const SESSION_PROGRAM_SIZE = 5;
+
+function exerciseProgramEntry(base, order) {
   return {
-    id: phase.id, name: phase.name, weeks: phase.weeks, goal: phase.goal,
-    sessions_target: SESSIONS_PER_PHASE, exercises,
+    id: base.id, section: base.section, name: base.name, note: base.note,
+    dose: base.dose,
+    muscle_groups: base.muscle_groups, demos: base.demos, order: order,
+    video_url: typeof base.video_url === 'string' ? base.video_url : '',
+    loaded_knee_flexion: base.loaded_knee_flexion === true,
   };
 }
-
-function doseForEntry(entry, base, week) {
-  const w = Number(week);
-  if ((w === 1 || w === 2 || w === 3) && entry.doses && entry.doses[w] != null && entry.doses[w] !== '') {
-    return entry.doses[w];
+function fullPoolProgram() {
+  return EXERCISES.map((base, i) => exerciseProgramEntry(base, i));
+}
+function resolveProgram(ids) {
+  const list = Array.isArray(ids) ? ids : [];
+  return list.map((id, i) => {
+    const base = EXERCISE_BY_ID.get(id);
+    if (!base) throw new Error('unknown exercise in program: ' + id);
+    return exerciseProgramEntry(base, i);
+  });
+}
+function resolvePhase(phaseId) {
+  const phase = PHASES.find(p => p.id === phaseId);
+  if (!phase) throw new Error('unknown phase: ' + phaseId);
+  return {
+    id: phase.id, name: phase.name, weeks: phase.weeks, goal: phase.goal,
+    sessions_target: SESSIONS_PER_PHASE, exercises: fullPoolProgram(),
+  };
+}
+/* Distinct known ids only, in stored order. Anything else is not a valid
+ * session program (see programForState's legacy handling). */
+function validExerciseIds(ids) {
+  const out = [];
+  if (!Array.isArray(ids)) return out;
+  ids.forEach(id => {
+    if (typeof id === 'string' && EXERCISE_BY_ID.has(id) && out.indexOf(id) === -1) out.push(id);
+  });
+  return out;
+}
+/* 5 distinct ids, uniformly at random (Fisher-Yates shuffle, then take 5).
+ * randomFn defaults to Math.random and is injectable for tests. */
+function pickRandomExerciseIds(randomFn) {
+  const rand = typeof randomFn === 'function' ? randomFn : Math.random;
+  const pool = EXERCISES.map(e => e.id);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
   }
-  if (entry.dose !== undefined) return entry.dose;
-  return base.dose;
+  return pool.slice(0, SESSION_PROGRAM_SIZE);
+}
+/* The program for a store-like state. No session -> full pool. A session
+ * with 5 valid distinct ids -> exactly those, in order, on every call
+ * (reload-safe: the ids live on the stored session). A session that
+ * predates this feature (no valid 5 ids) gets one fresh random 5 generated
+ * once, written onto the session object in place, and returned on every
+ * later call for that same state object; the browser persists it at boot
+ * and on the next save, so it stays stable across reloads too. */
+function programForState(state) {
+  const session = state ? state.session : null;
+  if (!sessionIsActive(session)) return fullPoolProgram();
+  const ids = validExerciseIds(session.exerciseIds);
+  if (ids.length === SESSION_PROGRAM_SIZE) return resolveProgram(ids);
+  const picked = pickRandomExerciseIds();
+  session.exerciseIds = picked;
+  return resolveProgram(picked);
+}
+function newSession(nowMs, day) {
+  return {
+    state: 'running',
+    startedAt: nowMs,
+    deadline: nowMs + SESSION_MS,
+    remainingMs: null,
+    day: day,
+    exerciseIds: pickRandomExerciseIds(),
+  };
 }
 
 /* Week 1 is sessions 0-2, week 2 is 3-5, week 3 is 6 and above.
@@ -320,6 +355,7 @@ function expireIfDue(state, now) {
     deadline: s.deadline,
     remainingMs: 0,
     day: s.day,
+    exerciseIds: Array.isArray(s.exerciseIds) ? s.exerciseIds.slice() : undefined,
   };
   return true;
 }
@@ -339,15 +375,18 @@ function canStartSession(state) {
    * selection: Start works on any day. */
   return { ok: true, action: 'start' };
 }
-function programExerciseIds(phaseId) {
-  return resolvePhase(normalizePhase(phaseId)).exercises.map(e => e.id);
+function programExerciseIds(state) {
+  if (state && typeof state === 'object' && 'session' in state) {
+    return programForState(state).map(e => e.id);
+  }
+  return fullPoolProgram().map(e => e.id);
 }
 function toggleCheckState(state, id) {
   if (!sessionIsActive(state.session)) return { ok: false, reason: 'no-session' };
   if (!isPlainObject(state.checks)) state.checks = {};
   if (state.checks[id]) delete state.checks[id];
   else state.checks[id] = true;
-  const allDone = programExerciseIds(state.phase).every(eid => !!state.checks[eid]);
+  const allDone = programExerciseIds(state).every(eid => !!state.checks[eid]);
   return { ok: true, allChecked: allDone };
 }
 /* Log the session day once. A session that already started keeps its own day.
@@ -576,8 +615,17 @@ function sanitizeSession(raw, present) {
   const startedAt = (typeof raw.startedAt === 'number' && Number.isFinite(raw.startedAt))
     ? raw.startedAt
     : raw.deadline - SESSION_MS;
+  /* A stored session program survives migration only as 5 valid distinct
+   * ids. Anything else is dropped here and treated as a legacy session
+   * (programForState generates one fresh random 5 for it). */
+  let exerciseIds = undefined;
+  if (Object.prototype.hasOwnProperty.call(raw, 'exerciseIds')) {
+    const valid = validExerciseIds(raw.exerciseIds);
+    if (valid.length === SESSION_PROGRAM_SIZE) exerciseIds = valid;
+    else repaired = true;
+  }
   return {
-    value: { state: state, startedAt: startedAt, deadline: raw.deadline, remainingMs: remaining, day: raw.day },
+    value: { state: state, startedAt: startedAt, deadline: raw.deadline, remainingMs: remaining, day: raw.day, exerciseIds: exerciseIds },
     repaired: repaired,
   };
 }
@@ -799,8 +847,7 @@ function currentPhaseId() {
   return normalizePhase(store.phase);
 }
 function currentProgram() {
-  const phase = currentPhaseId();
-  return resolvePhase(phase, programWeek(store, phase)).exercises;
+  return programForState(store);
 }
 function checkedCount() {
   return currentProgram().filter(e => store.checks[e.id]).length;
@@ -831,13 +878,7 @@ function startSession() {
     store.checks = {};
   }
   const now = Date.now();
-  store.session = {
-    state: 'running',
-    startedAt: now,
-    deadline: now + SESSION_MS,
-    remainingMs: null,
-    day: dayKey(new Date()),
-  };
+  store.session = newSession(now, dayKey(new Date()));
   save();
   renderAll();
   showMessage('Session started: 20:00 on the clock.');
@@ -1209,7 +1250,6 @@ function renderDemoDirectory() {
 function renderPhase() {
   const p = currentPhaseId();
   const phase = PHASES.find(x => x.id === p);
-  const week = programWeek(store, p);
   $('phaseTitle').textContent = 'Level ' + p + ': ' + phase.name;
   $('phaseGoal').textContent = phase.goal;
   const doseDraft = $('doseDraftNote');
@@ -1230,13 +1270,7 @@ function renderPhase() {
     }
   });
 
-  const credit = weekCredit(store, p);
-  const total = Math.max(0, Math.floor(Number(store.phaseSessions[p]) || 0));
-  let weekText = 'Week ' + week + ' moves for this level. Finish sessions to move up.';
-  if (total > credit) {
-    weekText += ' Finish sessions to move up a level.';
-  }
-  $('weekNote').textContent = weekText;
+  $('weekNote').textContent = 'Finish sessions to move up a level.';
 
   const advice = symptomAdvice(store);
   const adviceEl = $('symptomAdvice');
@@ -1398,6 +1432,13 @@ function boot() {
   bindUi();
   const today = new Date();
   renderedDayKey = dayKey(today);
+  /* A legacy session with no stored program gets its one random 5 here
+   * and saved at once, so a reload keeps the same 5. */
+  if (sessionIsActive(store.session)) {
+    const before = store.session.exerciseIds;
+    programForState(store);
+    if (store.session.exerciseIds !== before) save();
+  }
   let backupMade = false;
   if (bootNeedsBackup && bootRaw != null && bootRaw !== '') {
     try {
@@ -1437,7 +1478,17 @@ if (typeof module !== 'undefined') {
     NOTICE_CORRUPT: NOTICE_CORRUPT,
     NOTICE_PARTIAL: NOTICE_PARTIAL,
     BACKUP_NOTICE: BACKUP_NOTICE,
+    EXERCISES: EXERCISES,
+    PHASES: PHASES,
+    SESSION_PROGRAM_SIZE: SESSION_PROGRAM_SIZE,
     resolvePhase: resolvePhase,
+    resolveProgram: resolveProgram,
+    fullPoolProgram: fullPoolProgram,
+    validExerciseIds: validExerciseIds,
+    pickRandomExerciseIds: pickRandomExerciseIds,
+    programForState: programForState,
+    programExerciseIds: programExerciseIds,
+    newSession: newSession,
     resolveDemoList: resolveDemoList,
     remainingMs: remainingMs,
     migrate: migrate,
