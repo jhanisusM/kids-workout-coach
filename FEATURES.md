@@ -37,9 +37,14 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 - Timer expiry choice: done. Screen: dashboard.
   - Web test reference: let a running session reach 00:00.
   - Expected behavior: an expiry prompt offers Log anyway or Discard.
-    Checkboxes stay until the choice is made.
+    An expired session never traps the timer: Start stays visible, and
+    pressing Start on a workout day abandons the expired session without
+    logging it and starts a fresh 20:00 session with checkboxes reset.
+    On a rest day Start stays disabled. Checkboxes stay until Log anyway,
+    Discard, or a fresh Start.
   - Key elements: `[data-testid="expiry-confirm"]`,
-    `[data-testid="btn-expire-log"]`, `[data-testid="btn-expire-discard"]`.
+    `[data-testid="btn-expire-log"]`, `[data-testid="btn-expire-discard"]`,
+    `[data-testid="btn-start"]`.
   - Network: none.
 - Clear session with confirmation: done. Screen: dashboard.
   - Web test reference: press Clear session, then Yes, clear it (or Keep

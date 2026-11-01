@@ -387,7 +387,10 @@ function canStartSession(state) {
   const session = state.session;
   if (session && session.state === 'paused') return { ok: true, action: 'resume' };
   if (session && session.state === 'running') return { ok: false, reason: 'already-running' };
-  if (session && session.state === 'expired') return { ok: false, reason: 'expired' };
+  /* An expired session no longer blocks a fresh start: it falls through to
+   * the workout-day check, and startSession clears it (unlogged) below.
+   * Before this fix, an expired session hid Start and left the timer stuck
+   * at 00:00 until Log anyway or Discard was tapped. */
   if (!isGymDayKey(state.activeDay, state.workoutDays)) return { ok: false, reason: 'not-gym-day' };
   return { ok: true, action: 'start' };
 }
@@ -883,6 +886,13 @@ function startSession() {
   }
   if (decision.action === 'resume') { resumeSession(); return; }
   if (decision.action !== 'start') return;
+  /* A fresh start abandons an expired session without logging it. The
+   * Log anyway / Discard prompt stays available until Start is pressed,
+   * so logging the old session is still possible up to that point. */
+  if (store.session && store.session.state === 'expired') {
+    store.session = null;
+    store.checks = {};
+  }
   const now = Date.now();
   store.session = {
     state: 'running',
@@ -1095,11 +1105,15 @@ function renderTimer() {
   if (!s) t.textContent = fmtTime(SESSION_MS);
   else t.textContent = fmtTime(remainingMs(s, Date.now()));
   const active = sessionIsActive(s);
-  $('btnStart').hidden = !!s;
+  /* Start stays visible when the session expired, so the timer is never
+   * stuck at 00:00 with no way forward. It stays hidden while a session
+   * is running or paused (Pause / Resume own those states). */
+  $('btnStart').hidden = !!(s && s.state !== 'expired');
   /* On a rest day Start stays disabled with a plain note, instead of
    * silently doing nothing when tapped. Tapping a workout day on the
-   * calendar enables it again. */
-  const restDay = !s && !isGymDayKey(store.activeDay, store.workoutDays);
+   * calendar enables it again. An expired session does not change this:
+   * on a rest day Start stays disabled even with one pending. */
+  const restDay = (!s || s.state === 'expired') && !isGymDayKey(store.activeDay, store.workoutDays);
   $('btnStart').disabled = restDay;
   $('btnPause').hidden = !(s && s.state === 'running');
   $('btnResume').hidden = !(s && s.state === 'paused');
