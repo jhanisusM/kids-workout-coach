@@ -33,7 +33,6 @@
       <p class="lede">A fun 3-level program for kids 5 and older: warm-up play, strong legs, and tall posture. Bodyweight only, with animal moves and holds. Move up a level after 6 sessions.</p>
       <p class="demo-badge">Kids app: progress is stored in this browser only. No names, no photos, no accounts.</p>
     </div>
-    <div class="frequency"><span>Weekly rhythm</span><strong id="frequencyCount" data-testid="frequency-count">2 workout days</strong></div>
   </header>
 
   <div class="safety"><strong>Grown-ups, please stay nearby:</strong> this is a fun bodyweight workout for kids 5 and older, not medical advice. Stop any move that hurts and tell a grown-up. Short holds, soft landings, and breaks are part of the game.</div>
@@ -114,9 +113,9 @@
     <aside class="sidebar">
       <div class="side-card">
         <h2>Weekly calendar</h2>
-        <p>Tap a workout day. Change which days you train in Settings. A grown-up can help pick the days.</p>
+        <p>Days you trained show a done mark. Press Start any day to train.</p>
         <div class="cal-head">
-          <div><span class="cal-progress" id="calProgress" data-testid="cal-progress">0 / 2</span><div class="muted small">workout days done this week</div></div>
+          <div><span class="cal-progress" id="calProgress" data-testid="cal-progress">0 days trained this week</span></div>
         </div>
         <div class="week-grid" id="weekGrid" data-testid="week-grid"></div>
       </div>
@@ -143,9 +142,6 @@
   <button class="modal-backdrop" type="button" data-close-panel aria-label="Close settings"></button>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
     <h2 id="settingsTitle">Settings</h2>
-    <p>Choose which days you train. A day that is off stays a rest day and is not logged.</p>
-    <div class="day-choices" id="workoutDays" data-testid="workout-days" role="group" aria-label="Workout days"></div>
-    <p class="muted small" id="workoutDaysNote" data-testid="workout-days-note" hidden>Keep at least one workout day.</p>
     <div class="modal-actions">
       <button class="btn" id="btnSettingsClose" type="button" data-testid="btn-settings-close" data-close-panel>Close</button>
     </div>

@@ -86,8 +86,6 @@ h1 { font-size: clamp(2rem, 5vw, 3.6rem); letter-spacing: -.03em; margin: 0 0 10
 .timer.done { color: var(--red); }
 .timer-controls { display: flex; gap: 8px; flex-wrap: wrap; }
 .session-date { margin-top: 10px; font-size: .82rem; color: var(--muted); }
-/* Rest-day jump link: looks like a link, behaves like a button. */
-.jump-link { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--blue); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 
 .btn { min-height: 44px; border: 0; border-radius: 10px; padding: 0 18px; font-weight: 700; cursor: pointer; background: var(--green); color: #fff; }
 @media (prefers-color-scheme: dark) { .btn { color: #0d1a14; } }

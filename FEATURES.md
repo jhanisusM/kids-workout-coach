@@ -18,8 +18,9 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Web test reference: page `index.html` (or the single-file preview).
   - Expected behavior: pressing Start begins a 20:00 countdown that keeps
     running across a page reload from one stored deadline. Pause freezes it,
-    Resume continues it. On a rest day Start is disabled and the session
-    note says the day is a rest day.
+    Resume continues it. There is no day selection: Start works on any day,
+    and the session logs the day it was started on. With no session the
+    session note says to press Start to begin.
   - Key elements: `[data-testid="timer"]`, `[data-testid="btn-start"]`,
     `[data-testid="btn-pause"]`, `[data-testid="btn-resume"]`,
     `[data-testid="session-date"]`, `[data-testid="status-text"]`.
@@ -38,10 +39,9 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Web test reference: let a running session reach 00:00.
   - Expected behavior: an expiry prompt offers Log anyway or Discard.
     An expired session never traps the timer: Start stays visible, and
-    pressing Start on a workout day abandons the expired session without
-    logging it and starts a fresh 20:00 session with checkboxes reset.
-    On a rest day Start stays disabled. Checkboxes stay until Log anyway,
-    Discard, or a fresh Start.
+    pressing Start abandons the expired session without logging it and
+    starts a fresh 20:00 session with checkboxes reset. Checkboxes stay
+    until Log anyway, Discard, or a fresh Start.
   - Key elements: `[data-testid="expiry-confirm"]`,
     `[data-testid="btn-expire-log"]`, `[data-testid="btn-expire-discard"]`,
     `[data-testid="btn-start"]`.
@@ -104,34 +104,31 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 ## Calendar and settings
 
-- Weekly calendar: done. Screen: sidebar.
-  - Web test reference: tap a workout day, then tap a rest day.
-  - Expected behavior: workout days are tappable and select the day;
-    completed days show a done mark and count toward the week. Tapping a
-    rest day shows a short rest-day message instead of silently doing
-    nothing.
+- Weekly calendar (read-only progress view): done. Screen: sidebar.
+  - Web test reference: finish a session, then look at the calendar.
+  - Expected behavior: the week grid is read-only: calendar cells are
+    plain divs, not tappable, and tapping one does nothing. The current
+    day is highlighted, completed days show a done mark, and the progress
+    line reads "n day(s) trained this week" (for example "2 days trained
+    this week", or "1 day trained this week" for one day). There is no
+    day selection and no rest-day concept: pressing Start starts a
+    session on any day, and the session logs the day it was started on.
   - Key elements: `[data-testid="week-grid"]`,
-    `[data-testid="calendar-day"]`, `[data-testid="calendar-day-rest"]`,
-    `[data-testid="cal-progress"]`.
+    `[data-testid="calendar-day"]` (on every cell, including days with
+    no training), `[data-testid="cal-progress"]`.
   - Network: none.
-- Rest-day note jumps to the calendar: done. Screen: session panel.
-  - Web test reference: on a rest day with no session, tap the session
-    note.
-  - Expected behavior: the page scrolls to the Weekly calendar, where a
-    workout day can be picked. Picking a workout day, then Start, begins
-    a session. The note is only tappable for the rest-day case; session
-    lines for running, paused, or expired sessions are unchanged.
-  - Key elements: `[data-testid="session-date"]`,
-    `[data-testid="week-grid"]`.
-  - Network: none.
-- Settings, workout days: done. Screen: settings panel.
-  - Web test reference: open Settings from the menu button, toggle days.
-  - Expected behavior: picked days become workout days; at least one day
-    stays on, with a note if the last day is unticked.
+- Settings panel (workout-days setting removed): done. Screen: settings
+  panel.
+  - Web test reference: open Settings from the menu button, then Close.
+  - Expected behavior: the panel opens and closes. There is no
+    workout-days setting and no weekly-rhythm count: the former
+    `[data-testid="workout-days"]`, `[data-testid="workout-day-choice"]`,
+    `[data-testid="workout-days-note"]`, and `[data-testid="frequency-count"]`
+    elements are gone, and saved `workoutDays` data is simply no longer
+    read for gating.
   - Key elements: `[data-testid="btn-menu"]`,
-    `[data-testid="settings-panel"]`, `[data-testid="workout-days"]`,
-    `[data-testid="workout-day-choice"]`,
-    `[data-testid="btn-settings-close"]`, `[data-testid="frequency-count"]`.
+    `[data-testid="settings-panel"]`,
+    `[data-testid="btn-settings-close"]`.
   - Network: none.
 - Info panel: done. Screen: info panel.
   - Web test reference: tap the info button, then Close.
