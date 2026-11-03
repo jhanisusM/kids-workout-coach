@@ -17,7 +17,6 @@ const SECTIONS = [
   { id: 'warmup',    title: 'Warm-up Play',                block: 'foundation' },
   { id: 'strength',  title: 'Strong Legs',                 block: 'accessory' },
   { id: 'stability', title: 'Tall Posture',                block: 'foundation' },
-  { id: 'cooldown',  title: 'Cool-down Stretch',           block: 'foundation' },
 ];
 
 /* Kid play doses below were assigned by the coordinator, not the user;
@@ -113,24 +112,6 @@ const EXERCISES = [
     dose: '3 x 15 sec each side', muscle_groups: ['posture', 'balance'],
     demo_ids: ['v-spaceninja-flamingo'],
     video_url: 'https://www.youtube.com/watch?v=iJvhUhtvUwU' },
-  { id: 'butterfly-stretch', section: 'cooldown',
-    name: 'Butterfly Stretch',
-    note: 'Sit down, bring the soles of your feet together, and gently flap your knees like butterfly wings.',
-    dose: '30 sec', muscle_groups: ['stretch'],
-    demo_ids: ['v-wufshanti-butterfly'],
-    video_url: 'https://www.youtube.com/watch?v=Z47WQylFRmM' },
-  { id: 'childs-pose', section: 'cooldown',
-    name: "Child's Pose",
-    note: 'Kneel down, sit back on your heels, and reach your arms far forward on the floor to stretch your back.',
-    dose: '30 sec', muscle_groups: ['stretch', 'posture'],
-    demo_ids: ['v-flowgrow-childs-pose'],
-    video_url: 'https://www.youtube.com/watch?v=Gj6xIWML8m0' },
-  { id: 'deep-breathing', section: 'cooldown',
-    name: 'Deep Breathing',
-    note: 'Take a deep breath in while raising your arms up, and blow it out slowly while lowering them.',
-    dose: '5 breaths', muscle_groups: ['stretch'],
-    demo_ids: ['v-kidsyogastories-balloon-breath'],
-    video_url: 'https://www.youtube.com/watch?v=DVwWcUNWwyU' },
 ];
 
 /* Resolve every exercise's demo_ids into full video objects from the video
@@ -176,7 +157,7 @@ const EXERCISE_BY_ID = new Map(EXERCISES.map(e => [e.id, e]));
 
 /* Program resolution. The session program is exactly the 5 exercise ids
  * stored on the session (session.exerciseIds), in picked order, with
- * catalog doses. With no session, the program is the full 18-exercise
+ * catalog doses. With no session, the program is the full 15-exercise
  * pool, so the routine stays browseable before Start. resolvePhase keeps
  * its old shape for callers that need level metadata, with the full pool
  * as its exercises; it is not the session program. */
@@ -272,6 +253,8 @@ const STORE_VERSION = 3;
 const BACKUP_KEEP = 3;
 const NOTICE_CORRUPT = 'Saved data could not be read, so progress was reset to a fresh start.';
 const NOTICE_PARTIAL = 'Some saved data was unreadable and was reset. The rest of your progress was kept.';
+const NOTICE_MOVES_UPDATED = 'Your saved workout was updated to the new moves.';
+const REMOVED_MOVE_IDS = ['butterfly-stretch', 'childs-pose', 'deep-breathing'];
 const BACKUP_NOTICE = 'A backup of your previous save was stored in this browser.';
 const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DEFAULT_WORKOUT_DAYS = [2, 4];
@@ -616,17 +599,34 @@ function sanitizeSession(raw, present) {
     ? raw.startedAt
     : raw.deadline - SESSION_MS;
   /* A stored session program survives migration only as 5 valid distinct
-   * ids. Anything else is dropped here and treated as a legacy session
-   * (programForState generates one fresh random 5 for it). */
+   * ids. A list whose only unknown ids are removed moves is replaced with
+   * new moves and a soft notice. Junk ids (or a non-array list) mark the
+   * save repaired so the partial-reset notice wins, even when a removed
+   * move is listed too. */
   let exerciseIds = undefined;
+  let movesUpdated = false;
   if (Object.prototype.hasOwnProperty.call(raw, 'exerciseIds')) {
+    const listed = Array.isArray(raw.exerciseIds) ? raw.exerciseIds : null;
     const valid = validExerciseIds(raw.exerciseIds);
-    if (valid.length === SESSION_PROGRAM_SIZE) exerciseIds = valid;
-    else repaired = true;
+    if (!listed) {
+      repaired = true;
+    } else {
+      const junk = listed.some(id => {
+        if (typeof id !== 'string') return true;
+        if (REMOVED_MOVE_IDS.indexOf(id) !== -1) return false;
+        return !EXERCISE_BY_ID.has(id);
+      });
+      const citedRemoved = listed.some(id => typeof id === 'string' && REMOVED_MOVE_IDS.indexOf(id) !== -1);
+      if (valid.length === SESSION_PROGRAM_SIZE) exerciseIds = valid;
+      if (junk) repaired = true;
+      else if (citedRemoved && !repaired) movesUpdated = true;
+      else if (valid.length !== SESSION_PROGRAM_SIZE) repaired = true;
+    }
   }
   return {
     value: { state: state, startedAt: startedAt, deadline: raw.deadline, remainingMs: remaining, day: raw.day, exerciseIds: exerciseIds },
     repaired: repaired,
+    movesUpdated: movesUpdated,
   };
 }
 function sanitizeSymptoms(raw, present) {
@@ -708,7 +708,11 @@ function migrate(raw, now) {
     changed = true;
   }
 
+  if (sessionInfo.movesUpdated) changed = true;
   if (repaired) changed = true;
+  let notice = null;
+  if (repaired) notice = NOTICE_PARTIAL;
+  else if (sessionInfo.movesUpdated) notice = NOTICE_MOVES_UPDATED;
   return {
     state: {
       version: STORE_VERSION,
@@ -725,7 +729,7 @@ function migrate(raw, now) {
       history: historyInfo.value,
     },
     changed: changed,
-    notice: repaired ? NOTICE_PARTIAL : null,
+    notice: notice,
   };
 }
 
@@ -777,7 +781,7 @@ function pruneBackups(storage, keep) {
   });
   return { kept: keys.slice(0, Math.max(0, limit)), removed: removed };
 }
-/* The on-screen target and any later goal check stop at 9. Storage does not. */
+/* The on-screen target and any later goal check stop at SESSIONS_PER_PHASE. Storage does not. */
 function cappedSessionCount(count) {
   const n = Number(count);
   if (!Number.isFinite(n) || n <= 0) return 0;
@@ -1033,30 +1037,18 @@ function advancePhase() {
 }
 
 function openPanel(which) {
-  const settings = $('settingsPanel');
   const info = $('infoPanel');
-  if (which === 'settings') {
-    if (info) info.hidden = true;
-    if (settings) settings.hidden = false;
-  } else if (which === 'info') {
-    if (settings) settings.hidden = true;
-    if (info) info.hidden = false;
-  }
+  if (which === 'info' && info) info.hidden = false;
   syncPanelButtons();
 }
 function closePanels() {
-  const settings = $('settingsPanel');
   const info = $('infoPanel');
-  if (settings) settings.hidden = true;
   if (info) info.hidden = true;
   syncPanelButtons();
 }
 function syncPanelButtons() {
-  const menu = $('btnMenu');
   const info = $('btnInfo');
-  const settingsOpen = !!($('settingsPanel') && !$('settingsPanel').hidden);
   const infoOpen = !!($('infoPanel') && !$('infoPanel').hidden);
-  if (menu) menu.setAttribute('aria-expanded', settingsOpen ? 'true' : 'false');
   if (info) info.setAttribute('aria-expanded', infoOpen ? 'true' : 'false');
 }
 
@@ -1140,9 +1132,17 @@ function youtubeId(url) {
   else id = parsed.searchParams.get('v') || '';
   return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : '';
 }
+/* Only https links may become an href. Anything else (javascript:, data:)
+ * returns '' so the demo link is skipped. */
+function safeHttpsUrl(url) {
+  let parsed;
+  try { parsed = new URL(String(url || '').trim()); } catch (e) { return ''; }
+  return parsed.protocol === 'https:' ? parsed.href : '';
+}
 function nocookieEmbed(url) {
   const id = youtubeId(url);
-  return id ? 'https://www.youtube-nocookie.com/embed/' + id : '';
+  /* rel=0 keeps end-of-video suggestions to the same channel. */
+  return id ? 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0' : '';
 }
 function youtubeWatchUrl(url) {
   const id = youtubeId(url);
@@ -1152,15 +1152,15 @@ function videoEmbedHtml(ex) {
   const embed = nocookieEmbed(ex && ex.video_url);
   const watch = youtubeWatchUrl(ex && ex.video_url);
   if (!embed || !watch) return '';
-  return '<div class="video-frame"><iframe src="' + esc(embed) + '" title="' + esc('Demo: ' + ex.name) + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation allow-popups" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' +
-    '<a class="demo-watch" href="' + esc(watch) + '" target="_blank" rel="noopener noreferrer">Watch demo</a>';
+  return '<div class="video-frame"><iframe src="' + esc(embed) + '" title="' + esc('Demo: ' + ex.name) + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allow="encrypted-media; picture-in-picture; fullscreen" data-testid="demo-embed"></iframe></div>' +
+    '<a class="demo-watch" href="' + esc(watch) + '" target="_blank" rel="noopener noreferrer" data-testid="demo-watch">Watch demo</a>';
 }
 
 function demoHtml(ex) {
   if (!ex.demos || !ex.demos.length) return '';
   const i = demoIdx[ex.id] || 0;
   const d = ex.demos[i];
-  if (!d || !d.url) return '';
+  if (!d || !safeHttpsUrl(d.url)) return '';
   let nav = '';
   if (ex.demos.length > 1) {
     nav = '<div class="demo-nav">' +
@@ -1170,7 +1170,7 @@ function demoHtml(ex) {
   }
   const handle = d.handle ? ' ' + esc(d.handle) : '';
   return '<div class="demo" id="demo-' + esc(ex.id) + '">' +
-    '<a class="demo-link" href="' + esc(d.url) + '" target="_blank" rel="noopener">' +
+    '<a class="demo-link" href="' + esc(safeHttpsUrl(d.url)) + '" target="_blank" rel="noopener noreferrer" data-testid="demo-link">' +
     '\u25b6 Demo: ' + esc(d.creator) + handle +
     '<span class="demo-desc">' + esc(d.description) + '</span></a>' + nav + '</div>';
 }
@@ -1198,7 +1198,7 @@ function renderSections() {
     }).join('');
     const countLabel = exs.length === 1 ? '1 exercise' : exs.length + ' exercises';
     return '<section class="section' + (collapsed ? ' collapsed' : '') + (done ? ' complete' : '') + '">' +
-      '<button class="section-head" data-section="' + esc(sec.id) + '" data-testid="section-head">' +
+      '<button class="section-head" type="button" aria-expanded="' + (collapsed ? 'false' : 'true') + '" data-section="' + esc(sec.id) + '" data-testid="section-head">' +
       '<span class="section-title"><span class="step-no">' + String(stepNo).padStart(2, '0') + '</span>' +
       '<h3 class="section-heading">' + esc(sec.title) + '</h3>' +
       '<span class="block-tag">' + (sec.block === 'foundation' ? 'foundation block' : 'accessory block') + '</span></span>' +
@@ -1234,7 +1234,7 @@ function renderInfo() {
   const note = $('blockNote');
   if (!note) return;
   note.textContent =
-    'The routine is split into warm-up play, strong legs, tall posture, and cool-down stretch. ' +
+    'The routine is split into warm-up play, strong legs, and tall posture. ' +
     'Every move is bodyweight only, for kids 5 and older, with a grown-up nearby.';
 }
 
@@ -1392,9 +1392,8 @@ function onChange(ev) {
 }
 function onKey(ev) {
   if (ev.key === 'Escape') {
-    const settingsOpen = $('settingsPanel') && !$('settingsPanel').hidden;
     const infoOpen = $('infoPanel') && !$('infoPanel').hidden;
-    if (settingsOpen || infoOpen) closePanels();
+    if (infoOpen) closePanels();
     return;
   }
 }
@@ -1403,10 +1402,6 @@ function bindUi() {
   document.addEventListener('change', onChange);
   document.addEventListener('keydown', onKey);
   $('btnStart').addEventListener('click', startSession);
-  $('btnMenu').addEventListener('click', function () {
-    if ($('settingsPanel').hidden) openPanel('settings');
-    else closePanels();
-  });
   $('btnInfo').addEventListener('click', function () {
     if ($('infoPanel').hidden) openPanel('info');
     else closePanels();
@@ -1477,6 +1472,7 @@ if (typeof module !== 'undefined') {
     BACKUP_KEEP: BACKUP_KEEP,
     NOTICE_CORRUPT: NOTICE_CORRUPT,
     NOTICE_PARTIAL: NOTICE_PARTIAL,
+    NOTICE_MOVES_UPDATED: NOTICE_MOVES_UPDATED,
     BACKUP_NOTICE: BACKUP_NOTICE,
     EXERCISES: EXERCISES,
     PHASES: PHASES,
@@ -1505,6 +1501,8 @@ if (typeof module !== 'undefined') {
     expireIfDue: expireIfDue,
     canStartSession: canStartSession,
     youtubeId: youtubeId,
+    safeHttpsUrl: safeHttpsUrl,
+    nocookieEmbed: nocookieEmbed,
     toggleCheckState: toggleCheckState,
     applyCompletion: applyCompletion,
     phaseChangeDecision: phaseChangeDecision,

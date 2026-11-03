@@ -4,11 +4,20 @@ A guided 20-minute bodyweight workout for kids 5 and older. Stronger thighs,
 taller posture, fun holds and animal moves. Pure HTML, CSS, and JavaScript.
 No build step, no server, no accounts, no tracking. Progress lives in the
 browser's localStorage under the key `kids-coach-v1`. The exercise pool has
-18 moves; every session picks 5 of them at random (see Program below). The
-demo video library holds 17 verified video entries: no video URL has been
+15 moves; every session picks 5 of them at random (see Program below). The
+demo video library holds 14 verified video entries: no video URL has been
 invented, and a video is only added after it is opened and checked.
 Gorilla Squats is held out (unverified): it is not a programmed exercise
 and has no video entry.
+
+## Where things live
+
+- `docs/index.html`: page layout, CSP, and referrer policy.
+- `docs/app.js`: exercise pool, levels, session engine, storage, rendering.
+- `docs/video-library.js`: the 14 verified demo videos.
+- `docs/styles.css`: styles. `docs/favicon.svg`: icon.
+- `tests/app.test.js`: automated checks, run with `npm test`.
+- Publishing: GitHub Pages serves the `docs/` folder on `main`.
 
 How to test: open `index.html` (or the single-file preview built from it) in
 a browser. Everything is local except YouTube demo embeds and external
@@ -33,9 +42,9 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     then press Finish workout (or Clear session) and Start again.
   - Expected behavior: pressing Start (fresh start only, not Resume)
     picks 5 distinct exercise ids uniformly at random from the
-    18-exercise pool, in picked order, with catalog doses. The session's
+    15-exercise pool, in picked order, with catalog doses. The session's
     program is exactly those 5: progress reads n / 5, and checking all 5
-    (not all 18) gates the Finish prompt. Reloading, pausing, resuming,
+    (not all 15) gates the Finish prompt. Reloading, pausing, resuming,
     and timer expiry all keep the same 5: the ids are stored on the
     session (`session.exerciseIds`) and carried over when a session
     expires. Finish (completed) and Clear (cleared) end the session, so
@@ -86,9 +95,8 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Web test reference: look at the routine before starting, then start
     a session and check moves off.
   - Expected behavior: with no session, the routine shows the full
-    18-exercise pool (warm-up play, strong legs, tall posture, cool-down
-    stretch), each with steps and a dose label, and progress reads
-    0 / 18 with the 'Start a session' note. During a session it shows
+    15-exercise pool (warm-up play, strong legs, tall posture), each with steps and a dose label, and progress reads
+    0 / 15 with the 'Start a session' note. During a session it shows
     only the 5 picked moves, and checking updates the counts to n / 5.
     Doses are the catalog doses in both cases: levels no longer override
     them. Checkboxes are disabled before a session starts, and the
@@ -100,7 +108,8 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 - Collapsible sections: done. Screen: routine.
   - Web test reference: tap a section header.
   - Expected behavior: the section collapses and expands. Finished
-    sections show as complete.
+    sections show as complete. The header is a real button with
+    `aria-expanded` that reads true when open and false when collapsed.
   - Key elements: `[data-testid="section-head"]`.
   - Network: none.
 
@@ -137,7 +146,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     `[data-testid="advance-note"]`.
   - Network: none.
 
-## Calendar and settings
+## Calendar and info
 
 - Weekly calendar (read-only progress view): done. Screen: sidebar.
   - Web test reference: finish a session, then look at the calendar.
@@ -152,19 +161,9 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     `[data-testid="calendar-day"]` (on every cell, including days with
     no training), `[data-testid="cal-progress"]`.
   - Network: none.
-- Settings panel (workout-days setting removed): done. Screen: settings
-  panel.
-  - Web test reference: open Settings from the menu button, then Close.
-  - Expected behavior: the panel opens and closes. There is no
-    workout-days setting and no weekly-rhythm count: the former
-    `[data-testid="workout-days"]`, `[data-testid="workout-day-choice"]`,
-    `[data-testid="workout-days-note"]`, and `[data-testid="frequency-count"]`
-    elements are gone, and saved `workoutDays` data is simply no longer
-    read for gating.
-  - Key elements: `[data-testid="btn-menu"]`,
-    `[data-testid="settings-panel"]`,
-    `[data-testid="btn-settings-close"]`.
-  - Network: none.
+- Settings panel: removed. It held only a Close button, so the menu
+  button and the empty panel were taken out. `[data-testid="btn-menu"]`
+  and `[data-testid="settings-panel"]` no longer exist.
 - Info panel: done. Screen: info panel.
   - Web test reference: tap the info button, then Close.
   - Expected behavior: the panel explains how the routine is organized.
@@ -177,18 +176,21 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 - All the moves, with demo videos: done. Screen: moves directory.
   - Web test reference: scroll to All the moves.
-  - Expected behavior: one row per move for all 18 pool moves, backed by
-    17 library entries (Hopscotch and Step Jacks share one Little Sports
+  - Expected behavior: one row per move for all 15 pool moves, backed by
+    14 library entries (Hopscotch and Step Jacks share one Little Sports
     video). YouTube watch-URL picks play inline via youtube-nocookie
     embeds; the 4 Shorts picks (Bear Crawls, Frog Jumps, Star Jumps,
     Crab Walk) show as demo links on the routine card only,
     with no embed, and in All the moves those rows show the move name
     only. Every move has a demo link on its routine card. No invented
-    URLs and no search-result URLs: every video was opened and checked.
+    URLs and no search-result URLs: every video was opened and checked,
+    and each title and channel was rechecked through YouTube oEmbed.
+    Yoga content was removed: Butterfly Stretch, Child's Pose, and Deep
+    Breathing are no longer in the pool, and their 3 videos are gone.
     Chapter and segment notes apply where a video is shared or excerpted:
     Hopscotch at 0:00 and Step Jacks at 0:25 in the Little Sports video;
     Donkey Kicks Left at 6:56 and Right at 7:48 in the Little Sports
-    compilation; Child's Pose at 3:35 in the Flow and Grow yoga video;
+    compilation;
     Windmills as the first move in its Little Sports video. High Knees
     is flagged as the weakest pick: its demo is from XHIT Daily, an
     adult fitness channel, not kid-specific. Gorilla Squats is held out
@@ -210,3 +212,64 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Expected behavior: progress is still there, stored only in this
     browser under `kids-coach-v1`. No names, no photos, no accounts.
   - Network: none.
+
+## Kid safety and security
+
+- Privacy-friendly embeds: done. Screen: routine cards and All the moves.
+  - Web test reference: page `index.html`. Open a move whose demo is a
+    YouTube watch URL (for example Hopscotch) and let the player finish.
+  - Expected behavior: the iframe loads from `www.youtube-nocookie.com`
+    with `rel=0`, so end-of-video suggestions stay on the same channel.
+    `sandbox` is `allow-scripts allow-same-origin allow-presentation`
+    (no `allow-popups`). `allow` is `encrypted-media; picture-in-picture;
+    fullscreen` (no autoplay, sensors, or clipboard).
+  - Key elements: `[data-testid="demo-embed"]`, `[data-testid="demo-watch"]`.
+  - Network: youtube-nocookie only. The page itself does not log a CSP
+    violation.
+- Safe links: done. Screen: routine cards.
+  - Web test reference: page `index.html`. Read a demo link on a routine
+    card, including a Shorts pick such as Bear Crawls.
+  - Expected behavior: a demo link is shown only when its URL is https.
+    `javascript:` and `http:` links are omitted. External links open with
+    `rel="noopener noreferrer"`.
+  - Key elements: `[data-testid="demo-link"]`, `[data-testid="demo-watch"]`.
+  - Network: none from the link itself. Following a watch link leaves
+    this page for YouTube.
+- Content Security Policy: done. Location: `docs/index.html` head.
+  - Web test reference: page `index.html`. Reload with the console open.
+  - Expected behavior: the CSP meta tag allows scripts, styles, and
+    images from this site only (`'self'`), sets `connect-src 'none'`,
+    and limits frames to `https://www.youtube-nocookie.com`. The referrer
+    policy is `strict-origin-when-cross-origin`.
+  - Key elements: `meta[http-equiv="Content-Security-Policy"]`,
+    `[data-testid="demo-embed"]`.
+  - Network: youtube-nocookie frames only. No CSP console violations
+    from this page.
+- Safe rendering and storage: done. Screen: session message.
+  - Web test reference: page `index.html`. Reload with a saved session
+    that lists a removed move, and again with damaged saved data.
+  - Expected behavior: all text put into the page goes through `esc()`.
+    A saved session listing a removed move gets new moves and the
+    message 'Your saved workout was updated to the new moves.', while
+    damaged data still gets the reset notices. A saved session that
+    lists a removed move plus junk ids gets the partial-reset notice
+    ('Some saved data was unreadable and was reset. The rest of your
+    progress was kept.') rather than that soft notice. Saved data that
+    cannot be parsed resets to a fresh store
+    ('Saved data could not be read, so progress was reset to a fresh
+    start.'), and the original is backed up first.
+  - Key elements: `[data-testid="session-message"]`.
+  - Network: none.
+
+## Automated tests
+
+- `npm test` (Node 18 or newer, no installs): 10 checks. The pool has
+  15 moves and no yoga content, every demo id resolves, every video is
+  an https YouTube link, embeds use youtube-nocookie with `rel=0`, the
+  URL guard rejects `javascript:` and http links, a session picks 5
+  distinct moves, the removed-ids check confirms the dropped yoga moves
+  and videos are absent, the soft-notice check confirms a saved session
+  that listed a removed move gets new moves and 'Your saved workout was
+  updated to the new moves.', a saved session that lists a removed move
+  plus junk ids gets the partial-reset notice, and corrupt saved data
+  falls back safely.
