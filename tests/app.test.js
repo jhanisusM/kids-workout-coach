@@ -251,6 +251,23 @@ test('estimated session length stays between 15 and 22 minutes', () => {
   }
 });
 
+test('copy names the session length, across, and grown-up tips', () => {
+  assert.strictEqual(api.ACROSS_NOTE, 'Across means about 3 to 4 meters.');
+  assert.strictEqual(api.SESSION_LENGTH_LABEL, 'About 15 to 20 minutes.');
+  assert.match(api.GROWNUP_TIPS, /soft landings/);
+  assert.match(api.GROWNUP_TIPS, /knees not caving in/);
+  assert.match(api.GROWNUP_TIPS, /flat back/);
+  assert.match(api.GROWNUP_TIPS, /neck looking at the floor/);
+  assert.match(api.GROWNUP_TIPS, /mat for crawls/);
+  assert.match(api.GROWNUP_TIPS, /pain, dizziness, or limping/);
+  api.PHASES.forEach(p => {
+    assert.match(p.goal, /15 to 20 minutes/);
+    assert.doesNotMatch(p.goal, /five random/i);
+    assert.doesNotMatch(p.goal, /physical therapist|clinician/i);
+  });
+  assert.doesNotMatch(app, /physical therapist|clinician/i);
+});
+
 test('corrupt saved data falls back to a fresh store', () => {
   const r = api.loadStoreFromRaw('{not json', new Date());
   assert.ok(r.state && typeof r.state === 'object');

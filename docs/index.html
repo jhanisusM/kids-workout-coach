@@ -6,8 +6,8 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<title>Kids Workout Coach: 20-minute workout</title>
-<meta name="description" content="Kids Workout Coach: a guided 20-minute bodyweight workout for kids 5 and older. Stronger thighs, taller posture, fun holds and animal moves.">
+<title>Kids Workout Coach: about 15 to 20 minutes</title>
+<meta name="description" content="Kids Workout Coach: a guided workout of about 15 to 20 minutes for kids 5 and older. Stronger thighs, taller posture, fun holds and animal moves.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,7 +21,7 @@
   <header class="intro">
     <div>
       <div class="intro-top">
-        <h1>20-minute kids workout</h1>
+        <h1>Kids workout, about 15 to 20 minutes</h1>
         <div class="header-tools">
           <button class="icon-btn" id="btnInfo" type="button" data-testid="btn-info" aria-label="How the workout is organized" aria-expanded="false" aria-controls="infoPanel">
             <span class="icon-info" aria-hidden="true"></span>
@@ -34,10 +34,11 @@
   </header>
 
   <div class="safety"><strong>Grown-ups, please stay nearby:</strong> this is a fun bodyweight workout for kids 5 and older, not medical advice. Stop any move that hurts and tell a grown-up. Short holds, soft landings, and breaks are part of the game.</div>
+  <p class="across-note" id="acrossNote" data-testid="across-note">Across means about 3 to 4 meters.</p>
 
   <section class="card phase-card" aria-label="Program level">
     <div class="panel-label">Your levels</div>
-    <p class="draft-note" id="doseDraftNote">Grown-up note: bodyweight only. Stop if it hurts and tell a grown-up.</p>
+    <p class="draft-note" id="doseDraftNote" data-testid="grownup-tips">Grown-up tips: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping.</p>
     <h2 id="phaseTitle" data-testid="phase-title">Level 1: Starter</h2>
     <p class="muted" id="phaseGoal" data-testid="phase-goal"></p>
     <p class="week-note" id="weekNote" data-testid="week-note"></p>
@@ -77,6 +78,7 @@
       </div>
       <div class="session-date" id="sessionDate" data-testid="session-date">No active session</div>
       <p class="session-plan" id="sessionPlan" data-testid="session-plan" hidden>
+        <span id="sessionLength" data-testid="session-length"></span>
         <span id="sessionRounds" data-testid="session-rounds"></span>
         <span id="sessionRest" data-testid="session-rest"></span>
       </p>

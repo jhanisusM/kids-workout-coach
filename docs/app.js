@@ -206,24 +206,28 @@ const EASY_FINISH = {
   high_impact: false,
 };
 
+const ACROSS_NOTE = 'Across means about 3 to 4 meters.';
+const GROWNUP_TIPS = 'Grown-up tips: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping.';
+const SESSION_LENGTH_LABEL = 'About 15 to 20 minutes.';
+
 const PHASES = [
   {
     id: 1,
     name: 'Starter',
     weeks: 'Level 1',
-    goal: 'Five random videos every session. Bodyweight only, with a grown-up nearby.',
+    goal: 'About 15 to 20 minutes: warm-up, legs, tall posture, then an easy finish. One round of legs and posture. Bodyweight only, with a grown-up nearby.',
   },
   {
     id: 2,
     name: 'Stronger',
     weeks: 'Level 2',
-    goal: 'Keep going: five new random videos every session.',
+    goal: 'About 15 to 20 minutes, with 2 rounds of legs and posture and 20 seconds of rest.',
   },
   {
     id: 3,
     name: 'Superhero',
     weeks: 'Level 3',
-    goal: 'Superhero sessions: five random videos every time.',
+    goal: 'About 15 to 20 minutes, with 3 rounds of legs and posture and 15 seconds of rest.',
   },
 ];
 
@@ -1064,7 +1068,7 @@ function startSession() {
   store.session = newSession(now, dayKey(new Date()));
   save();
   renderAll();
-  showMessage('Session started: 20:00 on the clock.');
+  showMessage('Session started. About 15 to 20 minutes, with 20:00 on the clock.');
 }
 
 function pauseSession() {
@@ -1282,6 +1286,7 @@ function renderSessionPlan() {
   if (!show) return;
   const plan = levelPlan(currentPhaseId());
   const rounds = plan.rounds === 1 ? '1 round' : plan.rounds + ' rounds';
+  $('sessionLength').textContent = SESSION_LENGTH_LABEL;
   $('sessionRounds').textContent = 'Legs and posture: ' + rounds + '.';
   $('sessionRest').textContent = 'Rest ' + plan.restSec + ' sec between moves.';
 }
@@ -1428,7 +1433,8 @@ function renderInfo() {
   const note = $('blockNote');
   if (!note) return;
   note.textContent =
-    'The routine is split into warm-up play, strong legs, and tall posture. ' +
+    'Every session is warm-up play, strong legs, tall posture, and an easy finish. ' +
+    SESSION_LENGTH_LABEL + ' ' + ACROSS_NOTE + ' ' +
     'Every move is bodyweight only, for kids 5 and older, with a grown-up nearby.';
 }
 
@@ -1447,7 +1453,9 @@ function renderPhase() {
   $('phaseTitle').textContent = 'Level ' + p + ': ' + phase.name;
   $('phaseGoal').textContent = phase.goal;
   const doseDraft = $('doseDraftNote');
-  if (doseDraft) doseDraft.textContent = 'Grown-up note: bodyweight only. Stop if it hurts and tell a grown-up.';
+  if (doseDraft) doseDraft.textContent = GROWNUP_TIPS;
+  const across = $('acrossNote');
+  if (across) across.textContent = ACROSS_NOTE;
   const unlocked = unlockedPhaseOf(store);
   document.querySelectorAll('#phasePicker .phase-btn').forEach(b => {
     const id = Number(b.getAttribute('data-phase'));
@@ -1675,6 +1683,9 @@ if (typeof module !== 'undefined') {
     LEGACY_PROGRAM_SIZE: LEGACY_PROGRAM_SIZE,
     TEMPLATE_PICK_COUNT: TEMPLATE_PICK_COUNT,
     EASY_FINISH: EASY_FINISH,
+    ACROSS_NOTE: ACROSS_NOTE,
+    GROWNUP_TIPS: GROWNUP_TIPS,
+    SESSION_LENGTH_LABEL: SESSION_LENGTH_LABEL,
     resolvePhase: resolvePhase,
     resolveProgram: resolveProgram,
     fullPoolProgram: fullPoolProgram,

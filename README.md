@@ -11,6 +11,7 @@ Run it here: https://jhanisusM.github.io/kids-workout-coach/
 - Bodyweight only. No weights, no accounts, no tracking, no names or photos.
 - Progress is stored in the browser only, under its own key (kids-coach-v1), so it cannot mix with other workout apps.
 - A grown-up should stay nearby. Stop any move that hurts and tell a grown-up. This is a fun workout, not medical advice.
+- Dose numbers are a starting point. A pediatric physical therapist can check them.
 
 ## What it is not
 

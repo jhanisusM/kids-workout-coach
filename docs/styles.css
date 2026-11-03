@@ -72,7 +72,8 @@ h1 { font-size: clamp(2rem, 5vw, 3.6rem); letter-spacing: -.03em; margin: 0 0 10
 .demo-badge { display: inline-block; margin: 10px 0 0; font-size: .78rem; font-weight: 700; color: var(--blue); background: var(--blue-soft); border-radius: 20px; padding: 4px 12px; }
 .frequency { border-top: 1px solid var(--line); padding-top: 12px; display: flex; justify-content: space-between; font-size: .88rem; color: var(--muted); }
 
-.safety { background: var(--red-soft); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 20px; font-size: .92rem; line-height: 1.5; }
+.safety { background: var(--red-soft); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 8px; font-size: .92rem; line-height: 1.5; }
+.across-note { margin: 0 0 20px; color: var(--muted); font-size: .88rem; }
 .safety strong { color: var(--red); }
 
 .dashboard { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; margin-bottom: 26px; }
