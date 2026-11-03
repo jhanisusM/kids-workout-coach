@@ -208,9 +208,15 @@ const EASY_FINISH = {
 
 const ACROSS_NOTE = 'Across means about 3 to 4 meters.';
 const GROWNUP_TIPS = 'Grown-up tips: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping.';
-/* On-screen clock. Each level is the longest planned session at that
- * level, plus a short buffer: Starter 18, Stronger 20, Superhero 22. */
-const SESSION_MINUTES = { 1: 18, 2: 20, 3: 22 };
+/* On-screen clock. Starter and Stronger are not padded out to 20 minutes:
+ * they run about 15 to 18, so the clock is 18:00. Superhero's longest plan
+ * is past 21 minutes, so its clock is 22:00. */
+const SESSION_MINUTES = { 1: 18, 2: 18, 3: 22 };
+const SESSION_LENGTH_LABELS = {
+  1: 'About 15 to 18 minutes.',
+  2: 'About 15 to 18 minutes.',
+  3: 'About 22 minutes.',
+};
 function sessionMinutes(phaseId) {
   const n = Number(phaseId);
   return SESSION_MINUTES[n] || SESSION_MINUTES[1];
@@ -219,7 +225,8 @@ function sessionMs(phaseId) {
   return sessionMinutes(phaseId) * 60 * 1000;
 }
 function sessionLengthLabel(phaseId) {
-  return 'About ' + sessionMinutes(phaseId) + ' minutes.';
+  const n = Number(phaseId);
+  return SESSION_LENGTH_LABELS[n] || SESSION_LENGTH_LABELS[1];
 }
 
 const PHASES = [
@@ -227,13 +234,13 @@ const PHASES = [
     id: 1,
     name: 'Starter',
     weeks: 'Level 1',
-    goal: 'About 18 minutes: warm-up, legs, tall posture, then an easy finish. One round of legs and posture. Bodyweight only, with a grown-up nearby.',
+    goal: 'About 15 to 18 minutes: warm-up, legs, tall posture, then an easy finish. One round of legs and posture. Bodyweight only, with a grown-up nearby.',
   },
   {
     id: 2,
     name: 'Stronger',
     weeks: 'Level 2',
-    goal: 'About 20 minutes, with 2 rounds of legs and posture and 20 seconds of rest.',
+    goal: 'About 15 to 18 minutes, with 2 rounds of legs and posture and 20 seconds of rest.',
   },
   {
     id: 3,
@@ -322,7 +329,9 @@ function legTrios(legs) {
 }
 /* True when the saved ids are one template pick: 2 warm-up (first not
  * high-impact), 3 legs with at most one high-impact, 2 posture, no
- * duplicates, and no two high-impact moves in a row. */
+ * duplicates, and no two high-impact moves in a row. A big jump in the
+ * repeating leg and posture block is counted once per round, and that
+ * round stays at 2 big-jump sets or fewer. */
 function isTemplateIds(ids) {
   if (!Array.isArray(ids) || ids.length !== TEMPLATE_PICK_COUNT) return false;
   const exs = ids.map(id => EXERCISE_BY_ID.get(id));
@@ -335,14 +344,24 @@ function isTemplateIds(ids) {
   if (legs.filter(e => e.high_impact === true).length > 1) return false;
   const posture = exs.slice(5, 7);
   if (posture.some(e => e.section !== 'stability')) return false;
-  let highs = 0;
-  for (let i = 0; i < exs.length; i++) {
-    if (exs[i].high_impact === true) {
-      highs += 1;
-      if (i > 0 && exs[i - 1].high_impact === true) return false;
-    }
+  for (let i = 1; i < exs.length; i++) {
+    if (exs[i].high_impact === true && exs[i - 1].high_impact === true) return false;
   }
-  return highs <= 2;
+  const warmupJumps = exs.slice(0, 2).filter(e => e.high_impact === true).length;
+  const roundJumps = exs.slice(2, 7).filter(e => e.high_impact === true).length;
+  return warmupJumps <= 2 && roundJumps <= 2;
+}
+/* Big-jump sets once the template is played at a level. Warm-up runs
+ * once. The leg and posture block repeats, so a big jump there counts
+ * once every round. No round is allowed to pass 2. */
+function bigJumpSetsByRound(level, ids) {
+  const plan = levelPlan(level);
+  const exs = (Array.isArray(ids) ? ids : []).map(id => EXERCISE_BY_ID.get(id));
+  const warmup = exs.slice(0, 2).filter(e => e && e.high_impact === true).length;
+  const perRound = exs.slice(2, 7).filter(e => e && e.high_impact === true).length;
+  const rounds = [];
+  for (let r = 0; r < plan.rounds; r++) rounds.push(perRound);
+  return { warmup: warmup, rounds: rounds };
 }
 function withFinish(entries, level) {
   return entries.concat([exerciseProgramEntry(EASY_FINISH, entries.length, level)]);
@@ -382,9 +401,10 @@ function estimateSessionMinutes(level, ids) {
 /* Block picker. randomFn defaults to Math.random and must return a number
  * in [0, 1). Warm-up is 2 distinct moves and the first is never high-impact.
  * Legs are 3 distinct moves with at most 1 high-impact. Posture is both
- * Tall Posture moves while the pool has 2, otherwise 2 of them. The whole
- * pick has at most 2 high-impact moves and never two in a row. The easy
- * finish is not included here; programForState appends it. */
+ * Tall Posture moves while the pool has 2, otherwise 2 of them. Big jumps
+ * in that repeating block count once per round, and no round exceeds 2.
+ * Two high-impact moves are never back to back. The easy finish is not
+ * included here; programForState appends it. */
 function pickSessionExerciseIds(randomFn) {
   const rand = typeof randomFn === 'function' ? randomFn : Math.random;
   const warmup = EXERCISES.filter(e => e.section === 'warmup');
@@ -1684,6 +1704,7 @@ if (typeof module !== 'undefined') {
     sessionMs: sessionMs,
     sessionMinutes: sessionMinutes,
     sessionLengthLabel: sessionLengthLabel,
+    bigJumpSetsByRound: bigJumpSetsByRound,
     SESSIONS_PER_PHASE: SESSIONS_PER_PHASE,
     STORE_VERSION: STORE_VERSION,
     LS_KEY: LS_KEY,

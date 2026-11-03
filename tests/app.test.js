@@ -114,8 +114,11 @@ test('template sessions follow warm-up, legs, posture, finish', () => {
       assert.ok(legHigh <= 1);
       const highs = [];
       prog.forEach((id, i) => { if (isHigh(id)) highs.push(i); });
-      assert.ok(highs.length <= 2);
       for (let h = 1; h < highs.length; h++) assert.ok(highs[h] - highs[h - 1] > 1);
+      const jumps = api.bigJumpSetsByRound(level, ids);
+      assert.ok(jumps.warmup <= 2);
+      assert.strictEqual(jumps.rounds.length, api.levelPlan(level).rounds);
+      jumps.rounds.forEach(n => assert.ok(n <= 2 && n === legHigh));
       assert.deepEqual(prog.slice(5, 7).slice().sort(), postureIds.slice().sort());
       prog.slice(0, 2).forEach(id => seenWarm.add(id));
       prog.slice(2, 5).forEach(id => seenLeg.add(id));
@@ -241,21 +244,22 @@ test('rounds, rest, and doses follow the level', () => {
   assert.strictEqual(legacy.find(e => e.id === 'flamingo-balance').dose, '3 x 15 sec each side');
 });
 
-test('estimated session length stays between 15 and 22 minutes', () => {
+test('estimated session length stays in the level window', () => {
   for (const level of [1, 2, 3]) {
+    const cap = level === 3 ? 22 : 18;
     for (let n = 0; n < 1000; n++) {
       const ids = api.pickSessionExerciseIds(mulberry32(level * 100000 + n + 1));
       const minutes = api.estimateSessionMinutes(level, ids);
-      assert.ok(minutes >= 15 && minutes <= 22, 'level ' + level + ' ' + minutes);
+      assert.ok(minutes >= 15 && minutes <= cap, 'level ' + level + ' ' + minutes);
     }
   }
 });
 
 test('copy names the session length, across, and grown-up tips', () => {
   assert.strictEqual(api.ACROSS_NOTE, 'Across means about 3 to 4 meters.');
-  assert.deepEqual(api.SESSION_MINUTES, { 1: 18, 2: 20, 3: 22 });
-  assert.strictEqual(api.sessionLengthLabel(1), 'About 18 minutes.');
-  assert.strictEqual(api.sessionLengthLabel(2), 'About 20 minutes.');
+  assert.deepEqual(api.SESSION_MINUTES, { 1: 18, 2: 18, 3: 22 });
+  assert.strictEqual(api.sessionLengthLabel(1), 'About 15 to 18 minutes.');
+  assert.strictEqual(api.sessionLengthLabel(2), 'About 15 to 18 minutes.');
   assert.strictEqual(api.sessionLengthLabel(3), 'About 22 minutes.');
   assert.match(api.GROWNUP_TIPS, /soft landings/);
   assert.match(api.GROWNUP_TIPS, /knees not caving in/);
@@ -264,11 +268,26 @@ test('copy names the session length, across, and grown-up tips', () => {
   assert.match(api.GROWNUP_TIPS, /mat for crawls/);
   assert.match(api.GROWNUP_TIPS, /pain, dizziness, or limping/);
   api.PHASES.forEach(p => {
-    assert.match(p.goal, new RegExp('About ' + api.SESSION_MINUTES[p.id] + ' minutes'));
+    const label = api.sessionLengthLabel(p.id).replace(/\.$/, '');
+    assert.ok(p.goal.indexOf(label) === 0, p.goal);
     assert.doesNotMatch(p.goal, /five random/i);
     assert.doesNotMatch(p.goal, /physical therapist|clinician/i);
   });
   assert.doesNotMatch(app, /physical therapist|clinician/i);
+});
+
+test('a repeated big jump counts once per round, and no round exceeds 2', () => {
+  const ids = ['running-in-place', 'hopscotch', 'bear-crawls', 'frog-jumps', 'donkey-kicks', 'flamingo-balance', 'superkid'];
+  assert.strictEqual(api.isTemplateIds(ids), true);
+  assert.deepEqual(api.bigJumpSetsByRound(1, ids), { warmup: 1, rounds: [1] });
+  assert.deepEqual(api.bigJumpSetsByRound(2, ids), { warmup: 1, rounds: [1, 1] });
+  assert.deepEqual(api.bigJumpSetsByRound(3, ids), { warmup: 1, rounds: [1, 1, 1] });
+  const sets = api.bigJumpSetsByRound(3, ids);
+  const total = sets.warmup + sets.rounds.reduce((sum, n) => sum + n, 0);
+  assert.strictEqual(total, 4);
+  const twoInOneRound = ['running-in-place', 'arm-circles', 'frog-jumps', 'star-jumps', 'donkey-kicks', 'flamingo-balance', 'superkid'];
+  assert.deepEqual(api.bigJumpSetsByRound(3, twoInOneRound), { warmup: 0, rounds: [2, 2, 2] });
+  assert.strictEqual(api.isTemplateIds(twoInOneRound), false);
 });
 
 test('each level timer covers its longest estimate', () => {

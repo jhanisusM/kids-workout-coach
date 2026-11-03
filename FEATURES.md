@@ -1,6 +1,6 @@
 # Kids Workout Coach: FEATURES.md
 
-A bodyweight workout of about 18 to 22 minutes for kids 5 and older. Stronger
+A bodyweight workout of about 15 to 22 minutes for kids 5 and older. Stronger
 thighs, taller posture, fun holds and animal moves. Pure HTML, CSS, and
 JavaScript. No build step, no server, no accounts, no tracking. Progress
 lives in the browser's localStorage under the key `kids-coach-v1`. The
@@ -32,15 +32,16 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Web test reference: page `index.html` (or the single-file preview).
     Switch levels before Start.
   - Expected behavior: pressing Start begins that level's countdown and
-    keeps it across a page reload from one stored deadline. Starter is
-    18:00, Stronger is 20:00, and Superhero is 22:00. Each clock is the
-    longest planned session at that level plus a short buffer. Pause
-    freezes it, Resume continues it. There is no day selection: Start
-    works on any day, and the session logs the day it was started on.
-    With no session the session note says to press Start to begin, and
-    the clock shows the selected level. The page title says about 18 to
-    22 minutes. The session plan and the level goal name that level's
-    length (About 18 minutes, About 20 minutes, or About 22 minutes).
+    keeps it across a page reload from one stored deadline. Starter and
+    Stronger are not padded to 20:00: both run about 15 to 18 minutes,
+    and both clocks are 18:00. Superhero is 22:00. Pause freezes the
+    clock, Resume continues it. There is no day selection: Start works
+    on any day, and the session logs the day it was started on. With no
+    session the session note says to press Start to begin, and the clock
+    shows the selected level. The page title says about 15 to 22
+    minutes. The session plan and the level goal match the clock: About
+    15 to 18 minutes on Starter and Stronger, About 22 minutes on
+    Superhero.
   - Key elements: `[data-testid="timer"]`, `[data-testid="btn-start"]`,
     `[data-testid="btn-pause"]`, `[data-testid="btn-resume"]`,
     `[data-testid="session-date"]`, `[data-testid="status-text"]`,
@@ -55,8 +56,10 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     Order is 2 warm-up (the first is never high-impact), 3 leg moves
     (at most one high-impact), and 2 posture moves (Flamingo Balance and
     Superkid while those are the only two). The easy finish is appended
-    on screen and is not stored. The whole session has at most 2
-    high-impact moves and never two in a row. Progress reads n / 8, and
+    on screen and is not stored. A big jump in the leg and posture block
+    counts once every round, and no round has more than 2 big-jump sets.
+    Warm-up is played once. Two high-impact moves are never back to back,
+    and the session never starts with one. Progress reads n / 8, and
     checking all 8 gates the Finish prompt. Reloading, pausing, resuming,
     and timer expiry keep the same ids. Finish and Clear end the session,
     so the next Start builds a new template. A saved session from before
@@ -135,7 +138,8 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 - Level picker (Starter, Stronger, Superhero): done. Screen: levels card.
   - Web test reference: tap Level 2 or Level 3.
   - Expected behavior: the heading shows the level name (for example
-    Level 1: Starter). The goals say about 18, 20, and 22 minutes. Level 1
+    Level 1: Starter). The Starter and Stronger goals say about 15 to 18
+    minutes. Superhero says about 22 minutes. Level 1
     is one round of legs and posture, Level 2 is 2 rounds with 20
     seconds of rest, and Level 3 is 3 rounds with 15 seconds of rest.
     None of the goals say five random videos. Changing level while a
@@ -288,7 +292,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 ## Automated tests
 
-- `npm test` (Node 18 or newer, no installs): 15 checks. The pool has
+- `npm test` (Node 18 or newer, no installs): 16 checks. The pool has
   15 moves and no yoga content, every demo id resolves, every video is
   an https YouTube link, embeds use youtube-nocookie with `rel=0`, and
   the URL guard rejects `javascript:` and http links. The removed-ids
@@ -297,10 +301,12 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   gets new moves and 'Your saved workout was updated to the new moves.'
   A saved session that lists a removed move plus junk ids gets the
   partial-reset notice. It also runs 1000 seeded sessions per level and
-  checks the template order, the high-impact rules, that every warm-up
-  and leg move appears, that a legacy 5-id save still loads, that a new
-  session is stable across a reload, that rounds, rest, and doses match
-  the level, that the planned length is 15 to 22 minutes, that each
-  level's longest estimate fits inside that level's timer, that the
+  checks the template order, the high-impact rules, that a repeated
+  big jump counts once per round and no round exceeds 2 big-jump sets,
+  that every warm-up and leg move appears, that a legacy 5-id save still
+  loads, that a new session is stable across a reload, that rounds,
+  rest, and doses match the level, that Starter and Stronger stay about
+  15 to 18 minutes and Superhero stays within 22, that each level's
+  longest estimate fits inside that level's timer, that the
   length, across, and grown-up copy is present with no in-app clinician
   note, and that corrupt saved data falls back safely.
