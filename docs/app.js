@@ -1121,9 +1121,17 @@ function youtubeId(url) {
   else id = parsed.searchParams.get('v') || '';
   return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : '';
 }
+/* Only https links may become an href. Anything else (javascript:, data:)
+ * returns '' so the demo link is skipped. */
+function safeHttpsUrl(url) {
+  let parsed;
+  try { parsed = new URL(String(url || '').trim()); } catch (e) { return ''; }
+  return parsed.protocol === 'https:' ? parsed.href : '';
+}
 function nocookieEmbed(url) {
   const id = youtubeId(url);
-  return id ? 'https://www.youtube-nocookie.com/embed/' + id : '';
+  /* rel=0 keeps end-of-video suggestions to the same channel. */
+  return id ? 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0' : '';
 }
 function youtubeWatchUrl(url) {
   const id = youtubeId(url);
@@ -1133,7 +1141,7 @@ function videoEmbedHtml(ex) {
   const embed = nocookieEmbed(ex && ex.video_url);
   const watch = youtubeWatchUrl(ex && ex.video_url);
   if (!embed || !watch) return '';
-  return '<div class="video-frame"><iframe src="' + esc(embed) + '" title="' + esc('Demo: ' + ex.name) + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation allow-popups" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>' +
+  return '<div class="video-frame"><iframe src="' + esc(embed) + '" title="' + esc('Demo: ' + ex.name) + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>' +
     '<a class="demo-watch" href="' + esc(watch) + '" target="_blank" rel="noopener noreferrer">Watch demo</a>';
 }
 
@@ -1141,7 +1149,7 @@ function demoHtml(ex) {
   if (!ex.demos || !ex.demos.length) return '';
   const i = demoIdx[ex.id] || 0;
   const d = ex.demos[i];
-  if (!d || !d.url) return '';
+  if (!d || !safeHttpsUrl(d.url)) return '';
   let nav = '';
   if (ex.demos.length > 1) {
     nav = '<div class="demo-nav">' +
@@ -1151,7 +1159,7 @@ function demoHtml(ex) {
   }
   const handle = d.handle ? ' ' + esc(d.handle) : '';
   return '<div class="demo" id="demo-' + esc(ex.id) + '">' +
-    '<a class="demo-link" href="' + esc(d.url) + '" target="_blank" rel="noopener">' +
+    '<a class="demo-link" href="' + esc(safeHttpsUrl(d.url)) + '" target="_blank" rel="noopener noreferrer">' +
     '\u25b6 Demo: ' + esc(d.creator) + handle +
     '<span class="demo-desc">' + esc(d.description) + '</span></a>' + nav + '</div>';
 }
@@ -1486,6 +1494,8 @@ if (typeof module !== 'undefined') {
     expireIfDue: expireIfDue,
     canStartSession: canStartSession,
     youtubeId: youtubeId,
+    safeHttpsUrl: safeHttpsUrl,
+    nocookieEmbed: nocookieEmbed,
     toggleCheckState: toggleCheckState,
     applyCompletion: applyCompletion,
     phaseChangeDecision: phaseChangeDecision,
