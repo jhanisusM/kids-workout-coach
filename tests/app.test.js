@@ -253,7 +253,10 @@ test('estimated session length stays between 15 and 22 minutes', () => {
 
 test('copy names the session length, across, and grown-up tips', () => {
   assert.strictEqual(api.ACROSS_NOTE, 'Across means about 3 to 4 meters.');
-  assert.strictEqual(api.SESSION_LENGTH_LABEL, 'About 15 to 20 minutes.');
+  assert.deepEqual(api.SESSION_MINUTES, { 1: 18, 2: 20, 3: 22 });
+  assert.strictEqual(api.sessionLengthLabel(1), 'About 18 minutes.');
+  assert.strictEqual(api.sessionLengthLabel(2), 'About 20 minutes.');
+  assert.strictEqual(api.sessionLengthLabel(3), 'About 22 minutes.');
   assert.match(api.GROWNUP_TIPS, /soft landings/);
   assert.match(api.GROWNUP_TIPS, /knees not caving in/);
   assert.match(api.GROWNUP_TIPS, /flat back/);
@@ -261,11 +264,25 @@ test('copy names the session length, across, and grown-up tips', () => {
   assert.match(api.GROWNUP_TIPS, /mat for crawls/);
   assert.match(api.GROWNUP_TIPS, /pain, dizziness, or limping/);
   api.PHASES.forEach(p => {
-    assert.match(p.goal, /15 to 20 minutes/);
+    assert.match(p.goal, new RegExp('About ' + api.SESSION_MINUTES[p.id] + ' minutes'));
     assert.doesNotMatch(p.goal, /five random/i);
     assert.doesNotMatch(p.goal, /physical therapist|clinician/i);
   });
   assert.doesNotMatch(app, /physical therapist|clinician/i);
+});
+
+test('each level timer covers its longest estimate', () => {
+  for (const level of [1, 2, 3]) {
+    let longest = 0;
+    for (let n = 0; n < 1000; n++) {
+      const ids = api.pickSessionExerciseIds(mulberry32(level * 100000 + n + 1));
+      longest = Math.max(longest, api.estimateSessionSeconds(level, ids));
+    }
+    const timerSec = api.sessionMs(level) / 1000;
+    assert.ok(longest <= timerSec, 'level ' + level + ' estimate ' + longest + ' exceeds timer ' + timerSec);
+    const started = api.newSession(1_000_000, '2026-11-03', mulberry32(level), level);
+    assert.strictEqual(started.deadline - started.startedAt, api.sessionMs(level));
+  }
 });
 
 test('corrupt saved data falls back to a fresh store', () => {

@@ -1,6 +1,6 @@
 # Kids Workout Coach: FEATURES.md
 
-A bodyweight workout of about 15 to 20 minutes for kids 5 and older. Stronger
+A bodyweight workout of about 18 to 22 minutes for kids 5 and older. Stronger
 thighs, taller posture, fun holds and animal moves. Pure HTML, CSS, and
 JavaScript. No build step, no server, no accounts, no tracking. Progress
 lives in the browser's localStorage under the key `kids-coach-v1`. The
@@ -27,16 +27,20 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 ## Session
 
-- 20:00 timer for a session of about 15 to 20 minutes: done. Status: done.
+- Per-level timer: done. Status: done.
   Screen: dashboard timer panel.
   - Web test reference: page `index.html` (or the single-file preview).
-  - Expected behavior: pressing Start begins a 20:00 countdown that keeps
-    running across a page reload from one stored deadline. Pause freezes it,
-    Resume continues it. There is no day selection: Start works on any day,
-    and the session logs the day it was started on. With no session the
-    session note says to press Start to begin. The page title and the
-    session plan call the workout about 15 to 20 minutes. The countdown
-    itself stays 20:00.
+    Switch levels before Start.
+  - Expected behavior: pressing Start begins that level's countdown and
+    keeps it across a page reload from one stored deadline. Starter is
+    18:00, Stronger is 20:00, and Superhero is 22:00. Each clock is the
+    longest planned session at that level plus a short buffer. Pause
+    freezes it, Resume continues it. There is no day selection: Start
+    works on any day, and the session logs the day it was started on.
+    With no session the session note says to press Start to begin, and
+    the clock shows the selected level. The page title says about 18 to
+    22 minutes. The session plan and the level goal name that level's
+    length (About 18 minutes, About 20 minutes, or About 22 minutes).
   - Key elements: `[data-testid="timer"]`, `[data-testid="btn-start"]`,
     `[data-testid="btn-pause"]`, `[data-testid="btn-resume"]`,
     `[data-testid="session-date"]`, `[data-testid="status-text"]`,
@@ -81,7 +85,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Expected behavior: an expiry prompt offers Log anyway or Discard.
     An expired session never traps the timer: Start stays visible, and
     pressing Start abandons the expired session without logging it and
-    starts a fresh 20:00 session with a new template and checkboxes
+    starts a fresh session on that level's clock with a new template and checkboxes
     reset. Expiry itself preserves the old session's moves until then. Checkboxes stay
     until Log anyway, Discard, or a fresh Start.
   - Key elements: `[data-testid="expiry-confirm"]`,
@@ -131,7 +135,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 - Level picker (Starter, Stronger, Superhero): done. Screen: levels card.
   - Web test reference: tap Level 2 or Level 3.
   - Expected behavior: the heading shows the level name (for example
-    Level 1: Starter). Each goal says about 15 to 20 minutes. Level 1
+    Level 1: Starter). The goals say about 18, 20, and 22 minutes. Level 1
     is one round of legs and posture, Level 2 is 2 rounds with 20
     seconds of rest, and Level 3 is 3 rounds with 15 seconds of rest.
     None of the goals say five random videos. Changing level while a
@@ -284,7 +288,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 ## Automated tests
 
-- `npm test` (Node 18 or newer, no installs): 14 checks. The pool has
+- `npm test` (Node 18 or newer, no installs): 15 checks. The pool has
   15 moves and no yoga content, every demo id resolves, every video is
   an https YouTube link, embeds use youtube-nocookie with `rel=0`, and
   the URL guard rejects `javascript:` and http links. The removed-ids
@@ -296,6 +300,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   checks the template order, the high-impact rules, that every warm-up
   and leg move appears, that a legacy 5-id save still loads, that a new
   session is stable across a reload, that rounds, rest, and doses match
-  the level, that the planned length is 15 to 22 minutes, that the
+  the level, that the planned length is 15 to 22 minutes, that each
+  level's longest estimate fits inside that level's timer, that the
   length, across, and grown-up copy is present with no in-app clinician
   note, and that corrupt saved data falls back safely.

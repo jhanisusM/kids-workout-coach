@@ -208,26 +208,38 @@ const EASY_FINISH = {
 
 const ACROSS_NOTE = 'Across means about 3 to 4 meters.';
 const GROWNUP_TIPS = 'Grown-up tips: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping.';
-const SESSION_LENGTH_LABEL = 'About 15 to 20 minutes.';
+/* On-screen clock. Each level is the longest planned session at that
+ * level, plus a short buffer: Starter 18, Stronger 20, Superhero 22. */
+const SESSION_MINUTES = { 1: 18, 2: 20, 3: 22 };
+function sessionMinutes(phaseId) {
+  const n = Number(phaseId);
+  return SESSION_MINUTES[n] || SESSION_MINUTES[1];
+}
+function sessionMs(phaseId) {
+  return sessionMinutes(phaseId) * 60 * 1000;
+}
+function sessionLengthLabel(phaseId) {
+  return 'About ' + sessionMinutes(phaseId) + ' minutes.';
+}
 
 const PHASES = [
   {
     id: 1,
     name: 'Starter',
     weeks: 'Level 1',
-    goal: 'About 15 to 20 minutes: warm-up, legs, tall posture, then an easy finish. One round of legs and posture. Bodyweight only, with a grown-up nearby.',
+    goal: 'About 18 minutes: warm-up, legs, tall posture, then an easy finish. One round of legs and posture. Bodyweight only, with a grown-up nearby.',
   },
   {
     id: 2,
     name: 'Stronger',
     weeks: 'Level 2',
-    goal: 'About 15 to 20 minutes, with 2 rounds of legs and posture and 20 seconds of rest.',
+    goal: 'About 20 minutes, with 2 rounds of legs and posture and 20 seconds of rest.',
   },
   {
     id: 3,
     name: 'Superhero',
     weeks: 'Level 3',
-    goal: 'About 15 to 20 minutes, with 3 rounds of legs and posture and 15 seconds of rest.',
+    goal: 'About 22 minutes, with 3 rounds of legs and posture and 15 seconds of rest.',
   },
 ];
 
@@ -409,11 +421,11 @@ function programForState(state) {
   session.exerciseIds = picked;
   return withFinish(resolveProgram(picked, level), level);
 }
-function newSession(nowMs, day, randomFn) {
+function newSession(nowMs, day, randomFn, phaseId) {
   return {
     state: 'running',
     startedAt: nowMs,
-    deadline: nowMs + SESSION_MS,
+    deadline: nowMs + sessionMs(phaseId),
     remainingMs: null,
     day: day,
     exerciseIds: pickSessionExerciseIds(randomFn),
@@ -428,7 +440,6 @@ function phaseWeek(sessionCount) {
 }
 
 /* ---------------- Constants & store ---------------- */
-const SESSION_MS = 20 * 60 * 1000;
 const LS_KEY = 'kids-coach-v1';
 const STORE_VERSION = 3;
 const BACKUP_KEEP = 3;
@@ -515,7 +526,7 @@ function expireIfDue(state, now) {
   if (!shouldExpireOnLoad(s, now)) return false;
   state.session = {
     state: 'expired',
-    startedAt: typeof s.startedAt === 'number' ? s.startedAt : s.deadline - SESSION_MS,
+    startedAt: typeof s.startedAt === 'number' ? s.startedAt : s.deadline - sessionMs(state.phase),
     deadline: s.deadline,
     remainingMs: 0,
     day: s.day,
@@ -526,7 +537,7 @@ function expireIfDue(state, now) {
 function remainingMs(session, now) {
   const s = session === undefined ? store.session : session;
   const t = typeof now === 'number' ? now : Date.now();
-  if (!s) return SESSION_MS;
+  if (!s) return sessionMs(typeof store !== 'undefined' && store ? store.phase : 1);
   if (s.state === 'paused' || s.state === 'expired') return Math.max(0, s.remainingMs || 0);
   return Math.max(0, s.deadline - t);
 }
@@ -763,7 +774,7 @@ function sanitizeWorkoutDays(raw, present, thirdDay) {
   const known = thirdDay == null || thirdDay === 'none' || thirdDay === 'fri-morning' || thirdDay === 'fri-night' || thirdDay === 'sat-morning';
   return { value: workoutDaysFromThird(thirdDay), repaired: thirdDay != null && !known, changed: true };
 }
-function sanitizeSession(raw, present) {
+function sanitizeSession(raw, present, phaseId) {
   if (!present || raw == null) return { value: null, repaired: false };
   if (!isPlainObject(raw)) return { value: null, repaired: true };
   const state = raw.state;
@@ -778,7 +789,7 @@ function sanitizeSession(raw, present) {
   }
   const startedAt = (typeof raw.startedAt === 'number' && Number.isFinite(raw.startedAt))
     ? raw.startedAt
-    : raw.deadline - SESSION_MS;
+    : raw.deadline - sessionMs(phaseId);
   /* A stored program survives as 5 legacy ids or as 7 template ids.
    * A list whose only unknown ids are removed moves is replaced with
    * new moves and a soft notice. Junk ids (or a non-array list) mark the
@@ -876,7 +887,7 @@ function migrate(raw, now) {
   const completionsInfo = sanitizeCompletions(raw.completions, hasOwn(raw, 'completions'));
   const dayInfo = sanitizeActiveDay(raw.activeDay, hasOwn(raw, 'activeDay'), today);
   const daysInfo = sanitizeWorkoutDays(raw.workoutDays, hasOwn(raw, 'workoutDays'), raw.thirdDay);
-  const sessionInfo = sanitizeSession(raw.session, hasOwn(raw, 'session'));
+  const sessionInfo = sanitizeSession(raw.session, hasOwn(raw, 'session'), phase);
   const symptomsInfo = sanitizeSymptoms(raw.symptoms, hasOwn(raw, 'symptoms'));
   const historyInfo = sanitizeHistory(raw.history, hasOwn(raw, 'history'));
 
@@ -1065,10 +1076,11 @@ function startSession() {
     store.checks = {};
   }
   const now = Date.now();
-  store.session = newSession(now, dayKey(new Date()));
+  const phaseId = currentPhaseId();
+  store.session = newSession(now, dayKey(new Date()), undefined, phaseId);
   save();
   renderAll();
-  showMessage('Session started. About 15 to 20 minutes, with 20:00 on the clock.');
+  showMessage('Session started. ' + sessionLengthLabel(phaseId).replace(/\.$/, '') + ', with ' + fmtTime(sessionMs(phaseId)) + ' on the clock.');
 }
 
 function pauseSession() {
@@ -1255,7 +1267,7 @@ function renderTimer() {
   const s = store.session, t = $('timer');
   const expired = !!(s && s.state === 'expired');
   t.classList.toggle('done', expired);
-  if (!s) t.textContent = fmtTime(SESSION_MS);
+  if (!s) t.textContent = fmtTime(sessionMs(currentPhaseId()));
   else t.textContent = fmtTime(remainingMs(s, Date.now()));
   const active = sessionIsActive(s);
   /* Start stays visible when the session expired, so the timer is never
@@ -1286,7 +1298,7 @@ function renderSessionPlan() {
   if (!show) return;
   const plan = levelPlan(currentPhaseId());
   const rounds = plan.rounds === 1 ? '1 round' : plan.rounds + ' rounds';
-  $('sessionLength').textContent = SESSION_LENGTH_LABEL;
+  $('sessionLength').textContent = sessionLengthLabel(currentPhaseId());
   $('sessionRounds').textContent = 'Legs and posture: ' + rounds + '.';
   $('sessionRest').textContent = 'Rest ' + plan.restSec + ' sec between moves.';
 }
@@ -1434,7 +1446,7 @@ function renderInfo() {
   if (!note) return;
   note.textContent =
     'Every session is warm-up play, strong legs, tall posture, and an easy finish. ' +
-    SESSION_LENGTH_LABEL + ' ' + ACROSS_NOTE + ' ' +
+    sessionLengthLabel(currentPhaseId()) + ' ' + ACROSS_NOTE + ' ' +
     'Every move is bodyweight only, for kids 5 and older, with a grown-up nearby.';
 }
 
@@ -1668,7 +1680,10 @@ boot();
 
 if (typeof module !== 'undefined') {
   module.exports = {
-    SESSION_MS: SESSION_MS,
+    SESSION_MINUTES: SESSION_MINUTES,
+    sessionMs: sessionMs,
+    sessionMinutes: sessionMinutes,
+    sessionLengthLabel: sessionLengthLabel,
     SESSIONS_PER_PHASE: SESSIONS_PER_PHASE,
     STORE_VERSION: STORE_VERSION,
     LS_KEY: LS_KEY,
@@ -1685,7 +1700,6 @@ if (typeof module !== 'undefined') {
     EASY_FINISH: EASY_FINISH,
     ACROSS_NOTE: ACROSS_NOTE,
     GROWNUP_TIPS: GROWNUP_TIPS,
-    SESSION_LENGTH_LABEL: SESSION_LENGTH_LABEL,
     resolvePhase: resolvePhase,
     resolveProgram: resolveProgram,
     fullPoolProgram: fullPoolProgram,
