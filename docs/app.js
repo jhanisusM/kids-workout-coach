@@ -1392,10 +1392,6 @@ function bindUi() {
   document.addEventListener('change', onChange);
   document.addEventListener('keydown', onKey);
   $('btnStart').addEventListener('click', startSession);
-  $('btnMenu').addEventListener('click', function () {
-    if ($('settingsPanel').hidden) openPanel('settings');
-    else closePanels();
-  });
   $('btnInfo').addEventListener('click', function () {
     if ($('infoPanel').hidden) openPanel('info');
     else closePanels();
