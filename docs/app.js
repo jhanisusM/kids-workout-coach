@@ -17,6 +17,7 @@ const SECTIONS = [
   { id: 'warmup',    title: 'Warm-up Play',                block: 'foundation' },
   { id: 'strength',  title: 'Strong Legs',                 block: 'accessory' },
   { id: 'stability', title: 'Tall Posture',                block: 'foundation' },
+  { id: 'finish',    title: 'Easy Finish',                 block: 'foundation' },
 ];
 
 /* Kid play doses below were assigned by the coordinator, not the user;
@@ -124,13 +125,27 @@ EXERCISES.forEach(function (ex) {
   ex.demos = resolveDemoList(ex.demo_ids);
 });
 
-/* 3 levels, 6 sessions per level. Levels count sessions only: they carry
- * no exercise list and no dose overrides. Each session's program is 5
- * random exercises picked at Start (see SESSION_PROGRAM_SIZE and
- * programForState); doses are always the catalog doses. All moves are
+/* 3 levels, 6 sessions per level. A new session is a fixed block, not 5
+ * random moves: 2 warm-up, 3 legs, 2 posture, then an easy finish that is
+ * not in the exercise pool. Older saves with 5 ids still play those 5.
+ * Doses stay the catalog doses until a later change. All moves are
  * bodyweight only, for kids 5 and older, with a grown-up nearby.
  */
 const SESSIONS_PER_PHASE = 6;
+
+/* Not a pool exercise. No video, and it is a slow march plus a shake-out,
+ * not a stretch, a pose, or yoga. */
+const EASY_FINISH = {
+  id: 'easy-finish',
+  section: 'finish',
+  name: 'Easy Finish',
+  note: 'March slowly in place, tall and quiet, then shake out your arms and legs.',
+  dose: '1 min',
+  muscle_groups: ['easy finish'],
+  demos: [],
+  video_url: '',
+  high_impact: false,
+};
 
 const PHASES = [
   {
@@ -155,13 +170,16 @@ const PHASES = [
 
 const EXERCISE_BY_ID = new Map(EXERCISES.map(e => [e.id, e]));
 
-/* Program resolution. The session program is exactly the 5 exercise ids
- * stored on the session (session.exerciseIds), in picked order, with
- * catalog doses. With no session, the program is the full 15-exercise
- * pool, so the routine stays browseable before Start. resolvePhase keeps
- * its old shape for callers that need level metadata, with the full pool
- * as its exercises; it is not the session program. */
-const SESSION_PROGRAM_SIZE = 5;
+/* Program resolution. A new session stores 7 catalog ids (warm-up, legs,
+ * posture). The easy finish is appended when the program is built, so it
+ * is not saved. A saved session with exactly 5 catalog ids is a legacy
+ * program and plays those 5 with catalog doses. With no session, the
+ * program is the full pool, so the routine stays browseable before Start.
+ * resolvePhase keeps its old shape for callers that need level metadata,
+ * with the full pool as its exercises; it is not the session program. */
+const LEGACY_PROGRAM_SIZE = 5;
+const TEMPLATE_PICK_COUNT = 7;
+const SESSION_PROGRAM_SIZE = LEGACY_PROGRAM_SIZE;
 
 function exerciseProgramEntry(base, order) {
   return {
@@ -201,41 +219,105 @@ function validExerciseIds(ids) {
   });
   return out;
 }
-/* 5 distinct ids, uniformly at random (Fisher-Yates shuffle, then take 5).
- * randomFn defaults to Math.random and is injectable for tests. */
-function pickRandomExerciseIds(randomFn) {
-  const rand = typeof randomFn === 'function' ? randomFn : Math.random;
-  const pool = EXERCISES.map(e => e.id);
+function shuffleIds(list, rand) {
+  const pool = list.slice();
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
-    const tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+    const tmp = pool[i];
+    pool[i] = pool[j];
+    pool[j] = tmp;
   }
-  return pool.slice(0, SESSION_PROGRAM_SIZE);
+  return pool;
 }
-/* The program for a store-like state. No session -> full pool. A session
- * with 5 valid distinct ids -> exactly those, in order, on every call
- * (reload-safe: the ids live on the stored session). A session that
- * predates this feature (no valid 5 ids) gets one fresh random 5 generated
- * once, written onto the session object in place, and returned on every
- * later call for that same state object; the browser persists it at boot
- * and on the next save, so it stays stable across reloads too. */
+function legTrios(legs) {
+  const out = [];
+  for (let i = 0; i < legs.length; i++) {
+    for (let j = i + 1; j < legs.length; j++) {
+      for (let k = j + 1; k < legs.length; k++) {
+        const trio = [legs[i], legs[j], legs[k]];
+        const highs = trio.filter(e => e.high_impact === true).length;
+        if (highs <= 1) out.push(trio);
+      }
+    }
+  }
+  return out;
+}
+/* True when the saved ids are one template pick: 2 warm-up (first not
+ * high-impact), 3 legs with at most one high-impact, 2 posture, no
+ * duplicates, and no two high-impact moves in a row. */
+function isTemplateIds(ids) {
+  if (!Array.isArray(ids) || ids.length !== TEMPLATE_PICK_COUNT) return false;
+  const exs = ids.map(id => EXERCISE_BY_ID.get(id));
+  if (exs.some(e => !e)) return false;
+  if (new Set(ids).size !== ids.length) return false;
+  if (exs[0].section !== 'warmup' || exs[0].high_impact === true) return false;
+  if (exs[1].section !== 'warmup') return false;
+  const legs = exs.slice(2, 5);
+  if (legs.some(e => e.section !== 'strength')) return false;
+  if (legs.filter(e => e.high_impact === true).length > 1) return false;
+  const posture = exs.slice(5, 7);
+  if (posture.some(e => e.section !== 'stability')) return false;
+  let highs = 0;
+  for (let i = 0; i < exs.length; i++) {
+    if (exs[i].high_impact === true) {
+      highs += 1;
+      if (i > 0 && exs[i - 1].high_impact === true) return false;
+    }
+  }
+  return highs <= 2;
+}
+function withFinish(entries) {
+  return entries.concat([exerciseProgramEntry(EASY_FINISH, entries.length)]);
+}
+/* Block picker. randomFn defaults to Math.random and must return a number
+ * in [0, 1). Warm-up is 2 distinct moves and the first is never high-impact.
+ * Legs are 3 distinct moves with at most 1 high-impact. Posture is both
+ * Tall Posture moves while the pool has 2, otherwise 2 of them. The whole
+ * pick has at most 2 high-impact moves and never two in a row. The easy
+ * finish is not included here; programForState appends it. */
+function pickSessionExerciseIds(randomFn) {
+  const rand = typeof randomFn === 'function' ? randomFn : Math.random;
+  const warmup = EXERCISES.filter(e => e.section === 'warmup');
+  const legs = EXERCISES.filter(e => e.section === 'strength');
+  const posture = EXERCISES.filter(e => e.section === 'stability');
+  const easy = warmup.filter(e => e.high_impact !== true);
+  const first = shuffleIds(easy, rand)[0];
+  const second = shuffleIds(warmup.filter(e => e.id !== first.id), rand)[0];
+  const combos = legTrios(legs);
+  const chosen = combos[Math.floor(rand() * combos.length)].slice();
+  const ordered = shuffleIds(chosen, rand);
+  if (second.high_impact === true && ordered[0].high_impact === true) {
+    const swapAt = ordered.findIndex(e => e.high_impact !== true);
+    const tmp = ordered[0];
+    ordered[0] = ordered[swapAt];
+    ordered[swapAt] = tmp;
+  }
+  const posturePick = posture.length <= 2 ? shuffleIds(posture, rand) : shuffleIds(posture, rand).slice(0, 2);
+  return [first.id, second.id].concat(ordered.map(e => e.id), posturePick.map(e => e.id));
+}
+/* The program for a store-like state. No session -> full pool. A legacy
+ * session with 5 valid distinct ids -> exactly those, in order, on every
+ * call. A template session (7 valid ids) -> those 7 plus the easy finish.
+ * Anything else gets one template pick written onto the session object,
+ * so a reload keeps the same program. */
 function programForState(state) {
   const session = state ? state.session : null;
   if (!sessionIsActive(session)) return fullPoolProgram();
   const ids = validExerciseIds(session.exerciseIds);
-  if (ids.length === SESSION_PROGRAM_SIZE) return resolveProgram(ids);
-  const picked = pickRandomExerciseIds();
+  if (ids.length === LEGACY_PROGRAM_SIZE) return resolveProgram(ids);
+  if (isTemplateIds(ids)) return withFinish(resolveProgram(ids));
+  const picked = pickSessionExerciseIds();
   session.exerciseIds = picked;
-  return resolveProgram(picked);
+  return withFinish(resolveProgram(picked));
 }
-function newSession(nowMs, day) {
+function newSession(nowMs, day, randomFn) {
   return {
     state: 'running',
     startedAt: nowMs,
     deadline: nowMs + SESSION_MS,
     remainingMs: null,
     day: day,
-    exerciseIds: pickRandomExerciseIds(),
+    exerciseIds: pickSessionExerciseIds(randomFn),
   };
 }
 
@@ -598,11 +680,12 @@ function sanitizeSession(raw, present) {
   const startedAt = (typeof raw.startedAt === 'number' && Number.isFinite(raw.startedAt))
     ? raw.startedAt
     : raw.deadline - SESSION_MS;
-  /* A stored session program survives migration only as 5 valid distinct
-   * ids. A list whose only unknown ids are removed moves is replaced with
+  /* A stored program survives as 5 legacy ids or as 7 template ids.
+   * A list whose only unknown ids are removed moves is replaced with
    * new moves and a soft notice. Junk ids (or a non-array list) mark the
    * save repaired so the partial-reset notice wins, even when a removed
-   * move is listed too. */
+   * move is listed too. Anything else is dropped, and programForState
+   * writes a fresh template. */
   let exerciseIds = undefined;
   let movesUpdated = false;
   if (Object.prototype.hasOwnProperty.call(raw, 'exerciseIds')) {
@@ -617,10 +700,11 @@ function sanitizeSession(raw, present) {
         return !EXERCISE_BY_ID.has(id);
       });
       const citedRemoved = listed.some(id => typeof id === 'string' && REMOVED_MOVE_IDS.indexOf(id) !== -1);
-      if (valid.length === SESSION_PROGRAM_SIZE) exerciseIds = valid;
+      const usable = valid.length === LEGACY_PROGRAM_SIZE || isTemplateIds(valid);
+      if (usable) exerciseIds = valid;
       if (junk) repaired = true;
       else if (citedRemoved && !repaired) movesUpdated = true;
-      else if (valid.length !== SESSION_PROGRAM_SIZE) repaired = true;
+      else if (!usable) repaired = true;
     }
   }
   return {
@@ -1427,8 +1511,8 @@ function boot() {
   bindUi();
   const today = new Date();
   renderedDayKey = dayKey(today);
-  /* A legacy session with no stored program gets its one random 5 here
-   * and saved at once, so a reload keeps the same 5. */
+  /* A session with no usable program gets one template pick here and is
+   * saved at once, so a reload keeps the same moves. */
   if (sessionIsActive(store.session)) {
     const before = store.session.exerciseIds;
     programForState(store);
@@ -1477,11 +1561,15 @@ if (typeof module !== 'undefined') {
     EXERCISES: EXERCISES,
     PHASES: PHASES,
     SESSION_PROGRAM_SIZE: SESSION_PROGRAM_SIZE,
+    LEGACY_PROGRAM_SIZE: LEGACY_PROGRAM_SIZE,
+    TEMPLATE_PICK_COUNT: TEMPLATE_PICK_COUNT,
+    EASY_FINISH: EASY_FINISH,
     resolvePhase: resolvePhase,
     resolveProgram: resolveProgram,
     fullPoolProgram: fullPoolProgram,
     validExerciseIds: validExerciseIds,
-    pickRandomExerciseIds: pickRandomExerciseIds,
+    isTemplateIds: isTemplateIds,
+    pickSessionExerciseIds: pickSessionExerciseIds,
     programForState: programForState,
     programExerciseIds: programExerciseIds,
     newSession: newSession,
