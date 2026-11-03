@@ -57,11 +57,47 @@ test('random session picks 5 distinct known moves', () => {
   }
 });
 
+test('removed yoga moves and videos are absent', () => {
+  const goneMoves = ['butterfly-stretch', 'childs-pose', 'deep-breathing'];
+  const goneVideos = ['v-wufshanti-butterfly', 'v-flowgrow-childs-pose', 'v-kidsyogastories-balloon-breath'];
+  goneMoves.forEach(id => assert.ok(!EXERCISES.some(e => e.id === id), id));
+  goneVideos.forEach(id => assert.ok(!VIDEOS.some(v => v.id === id), id));
+});
+
+test('a saved session that cited a removed move gets a soft update notice', () => {
+  const raw = JSON.stringify({
+    version: 3,
+    phase: 1,
+    unlockedPhase: 1,
+    phaseSessions: { 1: 2, 2: 0, 3: 0 },
+    checks: {},
+    collapsed: {},
+    completions: {},
+    activeDay: '2026-11-03',
+    workoutDays: [2, 4],
+    symptoms: {},
+    history: [],
+    session: {
+      state: 'running',
+      startedAt: 1,
+      deadline: 2,
+      day: '2026-11-03',
+      exerciseIds: ['hopscotch', 'step-jacks', 'bear-crawls', 'flamingo-balance', 'butterfly-stretch'],
+    },
+  });
+  const r = api.loadStoreFromRaw(raw, new Date('2026-11-03T12:00:00'));
+  assert.strictEqual(r.notice, api.NOTICE_MOVES_UPDATED);
+  assert.strictEqual(r.notice, 'Your saved workout was updated to the new moves.');
+  assert.notStrictEqual(r.notice, api.NOTICE_PARTIAL);
+  assert.strictEqual(r.state.phaseSessions[1], 2);
+  assert.strictEqual(r.state.session.exerciseIds, undefined);
+});
+
 test('corrupt saved data falls back to a fresh store', () => {
   const r = api.loadStoreFromRaw('{not json', new Date());
   assert.ok(r.state && typeof r.state === 'object');
   assert.ok(r.notice);
   const r2 = api.loadStoreFromRaw('{"__proto__":{"polluted":true}}', new Date());
   assert.ok(r2.state);
-  assert.strictEqual(({}).polluted, undefined);
+  assert.strictEqual(vm.runInContext('({}).polluted', sandbox), undefined);
 });

@@ -216,20 +216,35 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 ## Kid safety and security
 
 - Privacy-friendly embeds: done. Screen: routine cards and All the moves.
-  - Web test reference: open any watch-URL demo and let it end.
-  - Expected behavior: embeds load from `www.youtube-nocookie.com` with
-    `rel=0`, so end-of-video suggestions stay on the same channel. The
-    iframe sandbox has no `allow-popups`, so taps inside the player
-    cannot open YouTube in a new tab. Only `encrypted-media`,
-    `picture-in-picture`, and `fullscreen` are allowed (no autoplay).
-  - Network: youtube-nocookie embeds.
-- Safe links: done. Every demo link must be https or it is not shown,
-  and external links open with `rel="noopener noreferrer"`.
-- Content Security Policy: done. Location: `docs/index.html`. Scripts,
-  styles, and images come from this site only, the page makes no network
-  requests of its own, and frames are limited to youtube-nocookie. The
-  referrer policy is `strict-origin-when-cross-origin`, which YouTube
-  needs for embeds to play.
+  - Web test reference: page `index.html`. Open a move whose demo is a
+    YouTube watch URL (for example Hopscotch) and let the player finish.
+  - Expected behavior: the iframe loads from `www.youtube-nocookie.com`
+    with `rel=0`, so end-of-video suggestions stay on the same channel.
+    `sandbox` is `allow-scripts allow-same-origin allow-presentation`
+    (no `allow-popups`). `allow` is `encrypted-media; picture-in-picture;
+    fullscreen` (no autoplay, sensors, or clipboard).
+  - Key elements: `[data-testid="demo-embed"]`, `[data-testid="demo-watch"]`.
+  - Network: youtube-nocookie only. The page itself does not log a CSP
+    violation.
+- Safe links: done. Screen: routine cards.
+  - Web test reference: page `index.html`. Read a demo link on a routine
+    card, including a Shorts pick such as Bear Crawls.
+  - Expected behavior: a demo link is shown only when its URL is https.
+    `javascript:` and `http:` links are omitted. External links open with
+    `rel="noopener noreferrer"`.
+  - Key elements: `[data-testid="demo-link"]`, `[data-testid="demo-watch"]`.
+  - Network: none from the link itself. Following a watch link leaves
+    this page for YouTube.
+- Content Security Policy: done. Location: `docs/index.html` head.
+  - Web test reference: page `index.html`. Reload with the console open.
+  - Expected behavior: the CSP meta tag allows scripts, styles, and
+    images from this site only (`'self'`), sets `connect-src 'none'`,
+    and limits frames to `https://www.youtube-nocookie.com`. The referrer
+    policy is `strict-origin-when-cross-origin`.
+  - Key elements: `meta[http-equiv="Content-Security-Policy"]`,
+    `[data-testid="demo-embed"]`.
+  - Network: youtube-nocookie frames only. No CSP console violations
+    from this page.
 - Safe rendering and storage: done. All text put into the page goes
   through `esc()`. Saved data that cannot be parsed resets to a fresh
   store with a notice, and the original is backed up first.

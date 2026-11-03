@@ -253,6 +253,8 @@ const STORE_VERSION = 3;
 const BACKUP_KEEP = 3;
 const NOTICE_CORRUPT = 'Saved data could not be read, so progress was reset to a fresh start.';
 const NOTICE_PARTIAL = 'Some saved data was unreadable and was reset. The rest of your progress was kept.';
+const NOTICE_MOVES_UPDATED = 'Your saved workout was updated to the new moves.';
+const REMOVED_MOVE_IDS = ['butterfly-stretch', 'childs-pose', 'deep-breathing'];
 const BACKUP_NOTICE = 'A backup of your previous save was stored in this browser.';
 const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DEFAULT_WORKOUT_DAYS = [2, 4];
@@ -597,17 +599,22 @@ function sanitizeSession(raw, present) {
     ? raw.startedAt
     : raw.deadline - SESSION_MS;
   /* A stored session program survives migration only as 5 valid distinct
-   * ids. Anything else is dropped here and treated as a legacy session
-   * (programForState generates one fresh random 5 for it). */
+   * ids. A list that still names a removed move is dropped without calling
+   * the rest of the save unreadable. Anything else is dropped and repaired. */
   let exerciseIds = undefined;
+  let movesUpdated = false;
   if (Object.prototype.hasOwnProperty.call(raw, 'exerciseIds')) {
+    const listed = Array.isArray(raw.exerciseIds) ? raw.exerciseIds : [];
     const valid = validExerciseIds(raw.exerciseIds);
+    const citedRemoved = listed.some(id => typeof id === 'string' && REMOVED_MOVE_IDS.indexOf(id) !== -1);
     if (valid.length === SESSION_PROGRAM_SIZE) exerciseIds = valid;
-    else repaired = true;
+    if (citedRemoved && !repaired) movesUpdated = true;
+    else if (valid.length !== SESSION_PROGRAM_SIZE) repaired = true;
   }
   return {
     value: { state: state, startedAt: startedAt, deadline: raw.deadline, remainingMs: remaining, day: raw.day, exerciseIds: exerciseIds },
     repaired: repaired,
+    movesUpdated: movesUpdated,
   };
 }
 function sanitizeSymptoms(raw, present) {
@@ -689,7 +696,11 @@ function migrate(raw, now) {
     changed = true;
   }
 
+  if (sessionInfo.movesUpdated) changed = true;
   if (repaired) changed = true;
+  let notice = null;
+  if (repaired) notice = NOTICE_PARTIAL;
+  else if (sessionInfo.movesUpdated) notice = NOTICE_MOVES_UPDATED;
   return {
     state: {
       version: STORE_VERSION,
@@ -706,7 +717,7 @@ function migrate(raw, now) {
       history: historyInfo.value,
     },
     changed: changed,
-    notice: repaired ? NOTICE_PARTIAL : null,
+    notice: notice,
   };
 }
 
@@ -1014,30 +1025,18 @@ function advancePhase() {
 }
 
 function openPanel(which) {
-  const settings = $('settingsPanel');
   const info = $('infoPanel');
-  if (which === 'settings') {
-    if (info) info.hidden = true;
-    if (settings) settings.hidden = false;
-  } else if (which === 'info') {
-    if (settings) settings.hidden = true;
-    if (info) info.hidden = false;
-  }
+  if (which === 'info' && info) info.hidden = false;
   syncPanelButtons();
 }
 function closePanels() {
-  const settings = $('settingsPanel');
   const info = $('infoPanel');
-  if (settings) settings.hidden = true;
   if (info) info.hidden = true;
   syncPanelButtons();
 }
 function syncPanelButtons() {
-  const menu = $('btnMenu');
   const info = $('btnInfo');
-  const settingsOpen = !!($('settingsPanel') && !$('settingsPanel').hidden);
   const infoOpen = !!($('infoPanel') && !$('infoPanel').hidden);
-  if (menu) menu.setAttribute('aria-expanded', settingsOpen ? 'true' : 'false');
   if (info) info.setAttribute('aria-expanded', infoOpen ? 'true' : 'false');
 }
 
@@ -1141,8 +1140,8 @@ function videoEmbedHtml(ex) {
   const embed = nocookieEmbed(ex && ex.video_url);
   const watch = youtubeWatchUrl(ex && ex.video_url);
   if (!embed || !watch) return '';
-  return '<div class="video-frame"><iframe src="' + esc(embed) + '" title="' + esc('Demo: ' + ex.name) + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allow="encrypted-media; picture-in-picture; fullscreen"></iframe></div>' +
-    '<a class="demo-watch" href="' + esc(watch) + '" target="_blank" rel="noopener noreferrer">Watch demo</a>';
+  return '<div class="video-frame"><iframe src="' + esc(embed) + '" title="' + esc('Demo: ' + ex.name) + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allow="encrypted-media; picture-in-picture; fullscreen" data-testid="demo-embed"></iframe></div>' +
+    '<a class="demo-watch" href="' + esc(watch) + '" target="_blank" rel="noopener noreferrer" data-testid="demo-watch">Watch demo</a>';
 }
 
 function demoHtml(ex) {
@@ -1159,7 +1158,7 @@ function demoHtml(ex) {
   }
   const handle = d.handle ? ' ' + esc(d.handle) : '';
   return '<div class="demo" id="demo-' + esc(ex.id) + '">' +
-    '<a class="demo-link" href="' + esc(safeHttpsUrl(d.url)) + '" target="_blank" rel="noopener noreferrer">' +
+    '<a class="demo-link" href="' + esc(safeHttpsUrl(d.url)) + '" target="_blank" rel="noopener noreferrer" data-testid="demo-link">' +
     '\u25b6 Demo: ' + esc(d.creator) + handle +
     '<span class="demo-desc">' + esc(d.description) + '</span></a>' + nav + '</div>';
 }
@@ -1381,9 +1380,8 @@ function onChange(ev) {
 }
 function onKey(ev) {
   if (ev.key === 'Escape') {
-    const settingsOpen = $('settingsPanel') && !$('settingsPanel').hidden;
     const infoOpen = $('infoPanel') && !$('infoPanel').hidden;
-    if (settingsOpen || infoOpen) closePanels();
+    if (infoOpen) closePanels();
     return;
   }
 }
@@ -1462,6 +1460,7 @@ if (typeof module !== 'undefined') {
     BACKUP_KEEP: BACKUP_KEEP,
     NOTICE_CORRUPT: NOTICE_CORRUPT,
     NOTICE_PARTIAL: NOTICE_PARTIAL,
+    NOTICE_MOVES_UPDATED: NOTICE_MOVES_UPDATED,
     BACKUP_NOTICE: BACKUP_NOTICE,
     EXERCISES: EXERCISES,
     PHASES: PHASES,
