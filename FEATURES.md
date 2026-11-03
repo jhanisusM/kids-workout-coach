@@ -10,6 +10,15 @@ invented, and a video is only added after it is opened and checked.
 Gorilla Squats is held out (unverified): it is not a programmed exercise
 and has no video entry.
 
+## Where things live
+
+- `docs/index.html`: page layout, CSP, and referrer policy.
+- `docs/app.js`: exercise pool, levels, session engine, storage, rendering.
+- `docs/video-library.js`: the 14 verified demo videos.
+- `docs/styles.css`: styles. `docs/favicon.svg`: icon.
+- `tests/app.test.js`: automated checks, run with `npm test`.
+- Publishing: GitHub Pages serves the `docs/` folder on `main`.
+
 How to test: open `index.html` (or the single-file preview built from it) in
 a browser. Everything is local except YouTube demo embeds and external
 demo links. Use the `data-testid` selectors below, not class names or deep CSS paths.
@@ -99,7 +108,8 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 - Collapsible sections: done. Screen: routine.
   - Web test reference: tap a section header.
   - Expected behavior: the section collapses and expands. Finished
-    sections show as complete.
+    sections show as complete. The header is a real button with
+    `aria-expanded` that reads true when open and false when collapsed.
   - Key elements: `[data-testid="section-head"]`.
   - Network: none.
 
@@ -136,7 +146,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     `[data-testid="advance-note"]`.
   - Network: none.
 
-## Calendar and settings
+## Calendar and info
 
 - Weekly calendar (read-only progress view): done. Screen: sidebar.
   - Web test reference: finish a session, then look at the calendar.
@@ -151,19 +161,9 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     `[data-testid="calendar-day"]` (on every cell, including days with
     no training), `[data-testid="cal-progress"]`.
   - Network: none.
-- Settings panel (workout-days setting removed): done. Screen: settings
-  panel.
-  - Web test reference: open Settings from the menu button, then Close.
-  - Expected behavior: the panel opens and closes. There is no
-    workout-days setting and no weekly-rhythm count: the former
-    `[data-testid="workout-days"]`, `[data-testid="workout-day-choice"]`,
-    `[data-testid="workout-days-note"]`, and `[data-testid="frequency-count"]`
-    elements are gone, and saved `workoutDays` data is simply no longer
-    read for gating.
-  - Key elements: `[data-testid="btn-menu"]`,
-    `[data-testid="settings-panel"]`,
-    `[data-testid="btn-settings-close"]`.
-  - Network: none.
+- Settings panel: removed. It held only a Close button, so the menu
+  button and the empty panel were taken out. `[data-testid="btn-menu"]`
+  and `[data-testid="settings-panel"]` no longer exist.
 - Info panel: done. Screen: info panel.
   - Web test reference: tap the info button, then Close.
   - Expected behavior: the panel explains how the routine is organized.
@@ -183,7 +183,10 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     Crab Walk) show as demo links on the routine card only,
     with no embed, and in All the moves those rows show the move name
     only. Every move has a demo link on its routine card. No invented
-    URLs and no search-result URLs: every video was opened and checked.
+    URLs and no search-result URLs: every video was opened and checked,
+    and each title and channel was rechecked through YouTube oEmbed.
+    Yoga content was removed: Butterfly Stretch, Child's Pose, and Deep
+    Breathing are no longer in the pool, and their 3 videos are gone.
     Chapter and segment notes apply where a video is shared or excerpted:
     Hopscotch at 0:00 and Step Jacks at 0:25 in the Little Sports video;
     Donkey Kicks Left at 6:56 and Right at 7:48 in the Little Sports
@@ -209,3 +212,32 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Expected behavior: progress is still there, stored only in this
     browser under `kids-coach-v1`. No names, no photos, no accounts.
   - Network: none.
+
+## Kid safety and security
+
+- Privacy-friendly embeds: done. Screen: routine cards and All the moves.
+  - Web test reference: open any watch-URL demo and let it end.
+  - Expected behavior: embeds load from `www.youtube-nocookie.com` with
+    `rel=0`, so end-of-video suggestions stay on the same channel. The
+    iframe sandbox has no `allow-popups`, so taps inside the player
+    cannot open YouTube in a new tab. Only `encrypted-media`,
+    `picture-in-picture`, and `fullscreen` are allowed (no autoplay).
+  - Network: youtube-nocookie embeds.
+- Safe links: done. Every demo link must be https or it is not shown,
+  and external links open with `rel="noopener noreferrer"`.
+- Content Security Policy: done. Location: `docs/index.html`. Scripts,
+  styles, and images come from this site only, the page makes no network
+  requests of its own, and frames are limited to youtube-nocookie. The
+  referrer policy is `strict-origin-when-cross-origin`, which YouTube
+  needs for embeds to play.
+- Safe rendering and storage: done. All text put into the page goes
+  through `esc()`. Saved data that cannot be parsed resets to a fresh
+  store with a notice, and the original is backed up first.
+
+## Automated tests
+
+- `npm test` (Node 18 or newer, no installs): checks the pool has 15
+  moves and no yoga content, every demo id resolves, every video is an
+  https YouTube link, embeds use youtube-nocookie with `rel=0`, the URL
+  guard rejects `javascript:` and http links, a session picks 5 distinct
+  moves, and corrupt saved data falls back safely.
