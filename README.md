@@ -7,7 +7,7 @@ Run it here: https://jhanisusM.github.io/kids-workout-coach/
 ## What it is
 
 - 13 moves in 3 levels: Starter, Stronger, Superhero, 6 sessions per level.
-- Warm-up play, strong legs, tall posture, and cool-down stretch.
+- Warm-up play, strong legs, and tall posture.
 - Bodyweight only. No weights, no accounts, no tracking, no names or photos.
 - Progress is stored in the browser only, under its own key (kids-coach-v1), so it cannot mix with other workout apps.
 - A grown-up should stay nearby. Stop any move that hurts and tell a grown-up. This is a fun workout, not medical advice.

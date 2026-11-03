@@ -93,33 +93,6 @@ const VIDEO_LIBRARY = {
       url: 'https://www.youtube.com/watch?v=iJvhUhtvUwU'
     },
     {
-      id: 'v-wufshanti-butterfly',
-      topic: 'kids-moves',
-      title: 'Butterfly Pose with Wuf Shanti (Yoga and Meditation for Kids)',
-      creator: 'Wuf Shanti, Mindfulness Yoga Meditation for Kids',
-      handle: '',
-      description: 'Kids butterfly pose: soles together, knees like wings, flap gently.',
-      url: 'https://www.youtube.com/watch?v=Z47WQylFRmM'
-    },
-    {
-      id: 'v-flowgrow-childs-pose',
-      topic: 'kids-moves',
-      title: 'Bedtime Yoga for Kids ages 2-6',
-      creator: 'Flow and Grow Kids Yoga',
-      handle: '',
-      description: "Kids yoga video; child's pose segment at 3:35, not a standalone demo.",
-      url: 'https://www.youtube.com/watch?v=Gj6xIWML8m0'
-    },
-    {
-      id: 'v-kidsyogastories-balloon-breath',
-      topic: 'kids-moves',
-      title: 'Breathing Exercises for Kids - Balloon Breath with Aybike',
-      creator: 'KidsYogaStories',
-      handle: '',
-      description: 'Kids balloon breath: deep breath in raising arms, slow exhale lowering them.',
-      url: 'https://www.youtube.com/watch?v=DVwWcUNWwyU'
-    },
-    {
       id: 'v-kidsfitmotion-crab-walk',
       topic: 'kids-moves',
       title: '3 Animal Walks for Kids | Frog Jump, Crab Walk & Bear Walk | Fun Fitness Activity!',

@@ -4,8 +4,8 @@ A guided 20-minute bodyweight workout for kids 5 and older. Stronger thighs,
 taller posture, fun holds and animal moves. Pure HTML, CSS, and JavaScript.
 No build step, no server, no accounts, no tracking. Progress lives in the
 browser's localStorage under the key `kids-coach-v1`. The exercise pool has
-18 moves; every session picks 5 of them at random (see Program below). The
-demo video library holds 17 verified video entries: no video URL has been
+15 moves; every session picks 5 of them at random (see Program below). The
+demo video library holds 14 verified video entries: no video URL has been
 invented, and a video is only added after it is opened and checked.
 Gorilla Squats is held out (unverified): it is not a programmed exercise
 and has no video entry.
@@ -33,9 +33,9 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     then press Finish workout (or Clear session) and Start again.
   - Expected behavior: pressing Start (fresh start only, not Resume)
     picks 5 distinct exercise ids uniformly at random from the
-    18-exercise pool, in picked order, with catalog doses. The session's
+    15-exercise pool, in picked order, with catalog doses. The session's
     program is exactly those 5: progress reads n / 5, and checking all 5
-    (not all 18) gates the Finish prompt. Reloading, pausing, resuming,
+    (not all 15) gates the Finish prompt. Reloading, pausing, resuming,
     and timer expiry all keep the same 5: the ids are stored on the
     session (`session.exerciseIds`) and carried over when a session
     expires. Finish (completed) and Clear (cleared) end the session, so
@@ -86,9 +86,8 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Web test reference: look at the routine before starting, then start
     a session and check moves off.
   - Expected behavior: with no session, the routine shows the full
-    18-exercise pool (warm-up play, strong legs, tall posture, cool-down
-    stretch), each with steps and a dose label, and progress reads
-    0 / 18 with the 'Start a session' note. During a session it shows
+    15-exercise pool (warm-up play, strong legs, tall posture), each with steps and a dose label, and progress reads
+    0 / 15 with the 'Start a session' note. During a session it shows
     only the 5 picked moves, and checking updates the counts to n / 5.
     Doses are the catalog doses in both cases: levels no longer override
     them. Checkboxes are disabled before a session starts, and the
@@ -177,8 +176,8 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 - All the moves, with demo videos: done. Screen: moves directory.
   - Web test reference: scroll to All the moves.
-  - Expected behavior: one row per move for all 18 pool moves, backed by
-    17 library entries (Hopscotch and Step Jacks share one Little Sports
+  - Expected behavior: one row per move for all 15 pool moves, backed by
+    14 library entries (Hopscotch and Step Jacks share one Little Sports
     video). YouTube watch-URL picks play inline via youtube-nocookie
     embeds; the 4 Shorts picks (Bear Crawls, Frog Jumps, Star Jumps,
     Crab Walk) show as demo links on the routine card only,
@@ -188,7 +187,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     Chapter and segment notes apply where a video is shared or excerpted:
     Hopscotch at 0:00 and Step Jacks at 0:25 in the Little Sports video;
     Donkey Kicks Left at 6:56 and Right at 7:48 in the Little Sports
-    compilation; Child's Pose at 3:35 in the Flow and Grow yoga video;
+    compilation;
     Windmills as the first move in its Little Sports video. High Knees
     is flagged as the weakest pick: its demo is from XHIT Daily, an
     adult fitness channel, not kid-specific. Gorilla Squats is held out

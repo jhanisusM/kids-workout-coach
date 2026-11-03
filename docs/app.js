@@ -17,7 +17,6 @@ const SECTIONS = [
   { id: 'warmup',    title: 'Warm-up Play',                block: 'foundation' },
   { id: 'strength',  title: 'Strong Legs',                 block: 'accessory' },
   { id: 'stability', title: 'Tall Posture',                block: 'foundation' },
-  { id: 'cooldown',  title: 'Cool-down Stretch',           block: 'foundation' },
 ];
 
 /* Kid play doses below were assigned by the coordinator, not the user;
@@ -113,24 +112,6 @@ const EXERCISES = [
     dose: '3 x 15 sec each side', muscle_groups: ['posture', 'balance'],
     demo_ids: ['v-spaceninja-flamingo'],
     video_url: 'https://www.youtube.com/watch?v=iJvhUhtvUwU' },
-  { id: 'butterfly-stretch', section: 'cooldown',
-    name: 'Butterfly Stretch',
-    note: 'Sit down, bring the soles of your feet together, and gently flap your knees like butterfly wings.',
-    dose: '30 sec', muscle_groups: ['stretch'],
-    demo_ids: ['v-wufshanti-butterfly'],
-    video_url: 'https://www.youtube.com/watch?v=Z47WQylFRmM' },
-  { id: 'childs-pose', section: 'cooldown',
-    name: "Child's Pose",
-    note: 'Kneel down, sit back on your heels, and reach your arms far forward on the floor to stretch your back.',
-    dose: '30 sec', muscle_groups: ['stretch', 'posture'],
-    demo_ids: ['v-flowgrow-childs-pose'],
-    video_url: 'https://www.youtube.com/watch?v=Gj6xIWML8m0' },
-  { id: 'deep-breathing', section: 'cooldown',
-    name: 'Deep Breathing',
-    note: 'Take a deep breath in while raising your arms up, and blow it out slowly while lowering them.',
-    dose: '5 breaths', muscle_groups: ['stretch'],
-    demo_ids: ['v-kidsyogastories-balloon-breath'],
-    video_url: 'https://www.youtube.com/watch?v=DVwWcUNWwyU' },
 ];
 
 /* Resolve every exercise's demo_ids into full video objects from the video
@@ -176,7 +157,7 @@ const EXERCISE_BY_ID = new Map(EXERCISES.map(e => [e.id, e]));
 
 /* Program resolution. The session program is exactly the 5 exercise ids
  * stored on the session (session.exerciseIds), in picked order, with
- * catalog doses. With no session, the program is the full 18-exercise
+ * catalog doses. With no session, the program is the full 15-exercise
  * pool, so the routine stays browseable before Start. resolvePhase keeps
  * its old shape for callers that need level metadata, with the full pool
  * as its exercises; it is not the session program. */
@@ -1234,7 +1215,7 @@ function renderInfo() {
   const note = $('blockNote');
   if (!note) return;
   note.textContent =
-    'The routine is split into warm-up play, strong legs, tall posture, and cool-down stretch. ' +
+    'The routine is split into warm-up play, strong legs, and tall posture. ' +
     'Every move is bodyweight only, for kids 5 and older, with a grown-up nearby.';
 }
 
