@@ -20,8 +20,8 @@ const VIDEOS = sandbox.__LIB.videos;
 
 const YOGA = /yoga|downward dog|child'?s pose|cobra|tree pose|warrior|cat-cow|cat cow|happy baby|sun salutation|butterfly pose|lotus|namaste/i;
 
-test('pool has 15 moves and no yoga content', () => {
-  assert.strictEqual(EXERCISES.length, 15);
+test('pool has 25 moves and no yoga content', () => {
+  assert.strictEqual(EXERCISES.length, 25);
   EXERCISES.forEach(e => assert.ok(!YOGA.test(e.name + ' ' + e.note + ' ' + e.id), e.id));
   VIDEOS.forEach(v => assert.ok(!YOGA.test([v.id, v.title, v.creator, v.description].join(' ')), v.id));
 });
@@ -29,7 +29,13 @@ test('pool has 15 moves and no yoga content', () => {
 test('every demo id resolves to a library video', () => {
   const ids = new Set(VIDEOS.map(v => v.id));
   EXERCISES.forEach(e => e.demo_ids.forEach(id => assert.ok(ids.has(id), e.id + ' -> ' + id)));
-  assert.strictEqual(VIDEOS.length, 14);
+  assert.strictEqual(VIDEOS.length, 17);
+  ['sit-to-stand', 'wall-stand', 'wall-angels', 'prone-yt', 'shoulder-squeezes'].forEach(id => {
+    const ex = EXERCISES.find(e => e.id === id);
+    assert.ok(ex, id);
+    assert.strictEqual(ex.video_url, '');
+    assert.strictEqual(ex.demo_ids.length, 0);
+  });
 });
 
 test('every video is an https YouTube link', () => {
@@ -97,6 +103,7 @@ test('template sessions follow warm-up, legs, posture, finish', () => {
   for (const level of [1, 2, 3]) {
     const seenWarm = new Set();
     const seenLeg = new Set();
+    const seenPosture = new Set();
     for (let n = 0; n < 1000; n++) {
       const ids = api.pickSessionExerciseIds(mulberry32(level * 100000 + n + 1));
       const state = storeWithSession(ids, level);
@@ -112,6 +119,11 @@ test('template sessions follow warm-up, legs, posture, finish', () => {
       assert.strictEqual(isHigh(prog[0]), false);
       const legHigh = prog.slice(2, 5).filter(isHigh).length;
       assert.ok(legHigh <= 1);
+      const kneeCount = prog.slice(2, 5).filter(id => {
+        const ex = EXERCISES.find(e => e.id === id);
+        return ex && ex.knee_bend === true;
+      }).length;
+      assert.ok(kneeCount >= 2, prog.slice(2, 5).join(','));
       const highs = [];
       prog.forEach((id, i) => { if (isHigh(id)) highs.push(i); });
       for (let h = 1; h < highs.length; h++) assert.ok(highs[h] - highs[h - 1] > 1);
@@ -119,9 +131,10 @@ test('template sessions follow warm-up, legs, posture, finish', () => {
       assert.ok(jumps.warmup <= 2);
       assert.strictEqual(jumps.rounds.length, api.levelPlan(level).rounds);
       jumps.rounds.forEach(n => assert.ok(n <= 2 && n === legHigh));
-      assert.deepEqual(prog.slice(5, 7).slice().sort(), postureIds.slice().sort());
+      prog.slice(5, 7).forEach(id => assert.ok(postureIds.indexOf(id) !== -1, id));
       prog.slice(0, 2).forEach(id => seenWarm.add(id));
       prog.slice(2, 5).forEach(id => seenLeg.add(id));
+      prog.slice(5, 7).forEach(id => seenPosture.add(id));
       const finish = api.programForState(loaded.state).find(e => e.id === 'easy-finish');
       assert.strictEqual(finish.dose, '1 min');
       assert.strictEqual(finish.video_url, '');
@@ -129,7 +142,11 @@ test('template sessions follow warm-up, legs, posture, finish', () => {
     }
     warmIds.forEach(id => assert.ok(seenWarm.has(id), 'level ' + level + ' missing warm-up ' + id));
     legIds.forEach(id => assert.ok(seenLeg.has(id), 'level ' + level + ' missing leg ' + id));
+    postureIds.forEach(id => assert.ok(seenPosture.has(id), 'level ' + level + ' missing posture ' + id));
   }
+  assert.strictEqual(api.isTemplateIds([
+    'running-in-place', 'hopscotch', 'bear-crawls', 'crab-walk', 'donkey-kicks', 'flamingo-balance', 'superkid',
+  ]), false);
 });
 
 test('removed yoga moves and videos are absent', () => {
@@ -212,10 +229,14 @@ test('legacy 5-id session still loads and a new session stays put', () => {
 });
 
 test('rounds, rest, and doses follow the level', () => {
-  const ids = ['running-in-place', 'hopscotch', 'bear-crawls', 'frog-jumps', 'donkey-kicks', 'flamingo-balance', 'superkid'];
+  const ids = ['running-in-place', 'hopscotch', 'bear-crawls', 'frog-jumps', 'sit-to-stand', 'flamingo-balance', 'superkid'];
   assert.strictEqual(api.isTemplateIds(ids), true);
   function dose(level, id) {
     return api.programForState(storeWithSession(ids, level)).find(e => e.id === id).dose;
+  }
+  const donkeyIds = ['running-in-place', 'arm-circles', 'donkey-kicks', 'frog-jumps', 'sit-to-stand', 'flamingo-balance', 'superkid'];
+  function donkeyDose(level) {
+    return api.programForState(storeWithSession(donkeyIds, level)).find(e => e.id === 'donkey-kicks').dose;
   }
   assert.deepEqual(api.levelPlan(1), { rounds: 3, restSec: 30 });
   assert.deepEqual(api.levelPlan(2), { rounds: 3, restSec: 15 });
@@ -229,8 +250,8 @@ test('rounds, rest, and doses follow the level', () => {
   assert.strictEqual(dose(1, 'bear-crawls'), '1 time across');
   assert.strictEqual(dose(2, 'bear-crawls'), '2 times across');
   assert.strictEqual(dose(3, 'bear-crawls'), '2 times across');
-  assert.strictEqual(dose(1, 'donkey-kicks'), '6 each side');
-  assert.strictEqual(dose(3, 'donkey-kicks'), '10 each side');
+  assert.strictEqual(donkeyDose(1), '6 each side');
+  assert.strictEqual(donkeyDose(3), '10 each side');
   assert.strictEqual(dose(1, 'flamingo-balance'), '2 x 8 sec each side');
   assert.strictEqual(dose(2, 'flamingo-balance'), '2 x 10 sec each side');
   assert.strictEqual(dose(3, 'flamingo-balance'), '3 x 15 sec each side');
@@ -238,6 +259,42 @@ test('rounds, rest, and doses follow the level', () => {
   assert.strictEqual(dose(2, 'superkid'), '3 x 10 sec');
   assert.strictEqual(dose(3, 'superkid'), '3 x 15 sec');
   assert.strictEqual(dose(1, 'easy-finish'), '1 min');
+  const thighIds = ['running-in-place', 'arm-circles', 'sit-to-stand', 'low-step-ups', 'wall-sit', 'wall-stand', 'bird-dog'];
+  assert.strictEqual(api.isTemplateIds(thighIds), true);
+  function doseOf(level, id) {
+    return api.programForState(storeWithSession(thighIds, level)).find(e => e.id === id).dose;
+  }
+  assert.strictEqual(doseOf(1, 'sit-to-stand'), '8 reps');
+  assert.strictEqual(doseOf(2, 'sit-to-stand'), '2 x 7 reps');
+  assert.strictEqual(doseOf(3, 'sit-to-stand'), '2 x 9 reps');
+  assert.strictEqual(doseOf(1, 'low-step-ups'), '4 each leg');
+  assert.strictEqual(doseOf(2, 'low-step-ups'), '7 each leg');
+  assert.strictEqual(doseOf(3, 'low-step-ups'), '9 each leg');
+  assert.strictEqual(doseOf(1, 'wall-sit'), '3 x 8 sec');
+  assert.strictEqual(doseOf(2, 'wall-sit'), '4 x 10 sec');
+  assert.strictEqual(doseOf(3, 'wall-sit'), '5 x 10 sec');
+  assert.strictEqual(doseOf(1, 'wall-stand'), '4 x 8 sec');
+  assert.strictEqual(doseOf(3, 'wall-stand'), '3 x 15 sec');
+  assert.strictEqual(doseOf(1, 'bird-dog'), '2 x 8 sec each side');
+  assert.strictEqual(doseOf(2, 'bird-dog'), '2 x 10 sec each side');
+  assert.strictEqual(doseOf(3, 'bird-dog'), '3 x 7 sec each side');
+  const moreIds = ['windmills', 'inchworm', 'bodyweight-squat', 'reverse-lunge', 'frog-jumps', 'wall-angels', 'prone-yt'];
+  assert.strictEqual(api.isTemplateIds(moreIds), true);
+  function doseMore(level, id) {
+    return api.programForState(storeWithSession(moreIds, level)).find(e => e.id === id).dose;
+  }
+  assert.strictEqual(doseMore(1, 'bodyweight-squat'), '8 reps');
+  assert.strictEqual(doseMore(3, 'bodyweight-squat'), '2 x 9 reps');
+  assert.strictEqual(doseMore(1, 'reverse-lunge'), '4 each side');
+  assert.strictEqual(doseMore(2, 'reverse-lunge'), '7 each side');
+  assert.strictEqual(doseMore(3, 'reverse-lunge'), '9 each side');
+  assert.strictEqual(doseMore(1, 'wall-angels'), '10 reps');
+  assert.strictEqual(doseMore(3, 'prone-yt'), '11 each letter');
+  assert.strictEqual(doseMore(2, 'frog-jumps'), '8 jumps');
+  const squeezeIds = ['windmills', 'inchworm', 'sit-to-stand', 'wall-sit', 'donkey-kicks', 'shoulder-squeezes', 'flamingo-balance'];
+  assert.strictEqual(api.isTemplateIds(squeezeIds), true);
+  assert.strictEqual(api.programForState(storeWithSession(squeezeIds, 1)).find(e => e.id === 'shoulder-squeezes').dose, '10 reps');
+  assert.strictEqual(api.programForState(storeWithSession(squeezeIds, 3)).find(e => e.id === 'shoulder-squeezes').dose, '15 reps');
   const legacy = api.programForState(storeWithSession(
     ['hopscotch', 'step-jacks', 'bear-crawls', 'donkey-kicks', 'flamingo-balance'], 3));
   assert.strictEqual(legacy.find(e => e.id === 'hopscotch').dose, '1 min');
@@ -331,7 +388,7 @@ test('copy names the session length, across, and grown-up tips', () => {
   assert.deepEqual(api.SESSION_MINUTES, { 1: 18, 2: 18, 3: 22 });
   assert.strictEqual(api.sessionLengthLabel(1), 'About 15 to 18 minutes.');
   assert.strictEqual(api.sessionLengthLabel(2), 'About 15 to 18 minutes.');
-  assert.strictEqual(api.sessionLengthLabel(3), 'About 20 to 22 minutes.');
+  assert.strictEqual(api.sessionLengthLabel(3), 'About 17 to 22 minutes.');
   assert.match(api.GROWNUP_TIPS, /soft landings/);
   assert.match(api.GROWNUP_TIPS, /knees not caving in/);
   assert.match(api.GROWNUP_TIPS, /flat back/);
@@ -348,7 +405,7 @@ test('copy names the session length, across, and grown-up tips', () => {
 });
 
 test('a repeated big jump counts once per round, and no round exceeds 2', () => {
-  const ids = ['running-in-place', 'hopscotch', 'bear-crawls', 'frog-jumps', 'donkey-kicks', 'flamingo-balance', 'superkid'];
+  const ids = ['running-in-place', 'hopscotch', 'bear-crawls', 'frog-jumps', 'sit-to-stand', 'flamingo-balance', 'superkid'];
   assert.strictEqual(api.isTemplateIds(ids), true);
   assert.deepEqual(api.bigJumpSetsByRound(1, ids), { warmup: 1, rounds: [1, 1, 1] });
   assert.deepEqual(api.bigJumpSetsByRound(2, ids), { warmup: 1, rounds: [1, 1, 1] });

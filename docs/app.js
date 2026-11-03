@@ -71,13 +71,13 @@ const EXERCISES = [
     dose: '2 times across', muscle_groups: ['thighs', 'arms', 'core'],
     demo_ids: ['v-crossrope-bear-crawl'],
     video_url: '' },
-  { id: 'frog-jumps', section: 'strength', high_impact: true,
+  { id: 'frog-jumps', section: 'strength', high_impact: true, knee_bend: true,
     name: 'Frog Jumps',
     note: 'Squat down low, then jump up high just like a frog leaping across a pond to build strong legs.',
     dose: '10 jumps', muscle_groups: ['thighs', 'jumping'],
     demo_ids: ['v-nursedeon-frog-jump'],
     video_url: '' },
-  { id: 'star-jumps', section: 'strength', high_impact: true,
+  { id: 'star-jumps', section: 'strength', high_impact: true, knee_bend: true,
     name: 'Star Jumps',
     note: 'Squat down, explode into a jump, and spread your arms and legs wide in the air like a star.',
     dose: '10 jumps', muscle_groups: ['whole body', 'jumping'],
@@ -113,6 +113,66 @@ const EXERCISES = [
     dose: '3 x 15 sec each side', muscle_groups: ['posture', 'balance'],
     demo_ids: ['v-spaceninja-flamingo'],
     video_url: 'https://www.youtube.com/watch?v=iJvhUhtvUwU' },
+  { id: 'sit-to-stand', section: 'strength', knee_bend: true,
+    name: 'Sit to Stand',
+    note: 'Sit on a sturdy chair, stand up tall, then sit back down with control.',
+    dose: '2 x 7 reps', muscle_groups: ['thighs'],
+    demo_ids: [],
+    video_url: '' },
+  { id: 'bodyweight-squat', section: 'strength', knee_bend: true,
+    name: 'Bodyweight Squat',
+    note: 'Stand with feet apart, sit your hips back and down, then stand tall again. Keep your knees over your toes.',
+    dose: '2 x 7 reps', muscle_groups: ['thighs'],
+    demo_ids: ['v-andy-kids-squat'],
+    video_url: 'https://www.youtube.com/watch?v=GD2F5sqsK1o' },
+  { id: 'low-step-ups', section: 'strength', knee_bend: true,
+    name: 'Low Step-Ups',
+    note: 'Step onto a low sturdy step with one foot, then the other, and step back down. Switch the lead foot.',
+    dose: '7 each leg', muscle_groups: ['thighs'],
+    demo_ids: ['v-livelean-kids-strength'],
+    video_url: 'https://www.youtube.com/watch?v=zMSx6K3mcvY' },
+  { id: 'wall-sit', section: 'strength', knee_bend: true,
+    name: 'Wall Sit',
+    note: 'Lean your back on a wall and slide down until your knees are bent, like sitting in an invisible chair. Hold, then stand up.',
+    dose: '4 x 10 sec', muscle_groups: ['thighs'],
+    demo_ids: ['v-livelean-kids-strength'],
+    video_url: 'https://www.youtube.com/watch?v=zMSx6K3mcvY' },
+  { id: 'reverse-lunge', section: 'strength', knee_bend: true,
+    name: 'Reverse Lunge',
+    note: 'Step one foot back and bend both knees a little, then push back to standing. Switch sides. A grown-up can hold a hand.',
+    dose: '7 each side', muscle_groups: ['thighs'],
+    demo_ids: ['v-livelean-kids-strength'],
+    video_url: 'https://www.youtube.com/watch?v=zMSx6K3mcvY' },
+  { id: 'wall-stand', section: 'stability',
+    name: 'Wall Stand',
+    note: 'Stand tall with the back of your head, your shoulders, and your bottom lightly touching a wall.',
+    dose: '4 x 10 sec', muscle_groups: ['posture'],
+    demo_ids: [],
+    video_url: '' },
+  { id: 'wall-angels', section: 'stability',
+    name: 'Wall Angels',
+    note: 'Stand with your back on a wall and slide your arms up and down, like a snow angel on the wall.',
+    dose: '2 x 7 reps', muscle_groups: ['posture', 'shoulders'],
+    demo_ids: [],
+    video_url: '' },
+  { id: 'bird-dog', section: 'stability',
+    name: 'Bird Dog',
+    note: 'On hands and knees, reach one arm forward and the other leg back. Keep a flat back and look at the floor, then switch.',
+    dose: '2 x 10 sec each side', muscle_groups: ['posture', 'core'],
+    demo_ids: ['v-cchmc-bird-dog'],
+    video_url: 'https://www.youtube.com/watch?v=kGPVyMPpEQo' },
+  { id: 'prone-yt', section: 'stability',
+    name: 'Prone Y and T Lifts',
+    note: 'Lie on your belly. Lift your arms into a Y, then into a T, thumbs up. Look at the floor.',
+    dose: '10 each letter', muscle_groups: ['posture', 'shoulders'],
+    demo_ids: [],
+    video_url: '' },
+  { id: 'shoulder-squeezes', section: 'stability',
+    name: 'Shoulder-Blade Squeezes',
+    note: 'Sit or stand tall and gently pinch your shoulder blades together, then let go.',
+    dose: '2 x 7 reps', muscle_groups: ['posture', 'shoulders'],
+    demo_ids: [],
+    video_url: '' },
 ];
 
 /* Resolve every exercise's demo_ids into full video objects from the video
@@ -140,7 +200,8 @@ const SESSIONS_PER_PHASE = 6;
  * Starter and Stronger both use 3 rounds so that real time is 15 to 18
  * minutes. Stronger rests 15 seconds, not 20: with 3 rounds, 20 seconds
  * of rest runs the longest plan past 18. Superhero is the same 3 rounds
- * with harder doses, and that real time is 20 to 22 minutes. */
+ * with harder doses. With this 25-move pool that real time is about
+ * 17 to 22 minutes, so the label and the 22:00 clock say so. */
 const LEVEL_PLAN = {
   1: { rounds: 3, restSec: 30 },
   2: { rounds: 3, restSec: 15 },
@@ -158,6 +219,22 @@ const FLAMINGO_DOSE = { 1: '2 x 8 sec each side', 2: '2 x 10 sec each side', 3: 
 const FLAMINGO_WORK = { 1: 32, 2: 40, 3: 90 };
 const SUPERKID_DOSE = { 1: '2 x 8 sec', 2: '3 x 10 sec', 3: '3 x 15 sec' };
 const SUPERKID_WORK = { 1: 16, 2: 30, 3: 45 };
+const SQUAT_DOSE = { 1: '8 reps', 2: '2 x 7 reps', 3: '2 x 9 reps' };
+const SQUAT_WORK = { 1: 24, 2: 42, 3: 54 };
+const STEP_DOSE = { 1: '4 each leg', 2: '7 each leg', 3: '9 each leg' };
+const STEP_WORK = { 1: 24, 2: 42, 3: 54 };
+const WALLSIT_DOSE = { 1: '3 x 8 sec', 2: '4 x 10 sec', 3: '5 x 10 sec' };
+const WALLSIT_WORK = { 1: 24, 2: 40, 3: 50 };
+const LUNGE_DOSE = { 1: '4 each side', 2: '7 each side', 3: '9 each side' };
+const LUNGE_WORK = { 1: 24, 2: 42, 3: 54 };
+const WALLSTAND_DOSE = { 1: '4 x 8 sec', 2: '4 x 10 sec', 3: '3 x 15 sec' };
+const WALLSTAND_WORK = { 1: 32, 2: 40, 3: 45 };
+const ANGEL_DOSE = { 1: '10 reps', 2: '2 x 7 reps', 3: '15 reps' };
+const ANGEL_WORK = { 1: 30, 2: 42, 3: 45 };
+const BIRD_DOSE = { 1: '2 x 8 sec each side', 2: '2 x 10 sec each side', 3: '3 x 7 sec each side' };
+const BIRD_WORK = { 1: 32, 2: 40, 3: 42 };
+const YT_DOSE = { 1: '8 each letter', 2: '10 each letter', 3: '11 each letter' };
+const YT_WORK = { 1: 32, 2: 40, 3: 44 };
 
 function levelPlan(phaseId) {
   return LEVEL_PLAN[normalizePhase(phaseId)];
@@ -191,6 +268,46 @@ function assignLevelDoses(ex) {
   if (ex.id === 'superkid') {
     ex.doses = SUPERKID_DOSE;
     ex.work = SUPERKID_WORK;
+    return;
+  }
+  if (ex.id === 'sit-to-stand' || ex.id === 'bodyweight-squat') {
+    ex.doses = SQUAT_DOSE;
+    ex.work = SQUAT_WORK;
+    return;
+  }
+  if (ex.id === 'low-step-ups') {
+    ex.doses = STEP_DOSE;
+    ex.work = STEP_WORK;
+    return;
+  }
+  if (ex.id === 'wall-sit') {
+    ex.doses = WALLSIT_DOSE;
+    ex.work = WALLSIT_WORK;
+    return;
+  }
+  if (ex.id === 'reverse-lunge') {
+    ex.doses = LUNGE_DOSE;
+    ex.work = LUNGE_WORK;
+    return;
+  }
+  if (ex.id === 'wall-stand') {
+    ex.doses = WALLSTAND_DOSE;
+    ex.work = WALLSTAND_WORK;
+    return;
+  }
+  if (ex.id === 'wall-angels' || ex.id === 'shoulder-squeezes') {
+    ex.doses = ANGEL_DOSE;
+    ex.work = ANGEL_WORK;
+    return;
+  }
+  if (ex.id === 'bird-dog') {
+    ex.doses = BIRD_DOSE;
+    ex.work = BIRD_WORK;
+    return;
+  }
+  if (ex.id === 'prone-yt') {
+    ex.doses = YT_DOSE;
+    ex.work = YT_WORK;
   }
 }
 EXERCISES.forEach(assignLevelDoses);
@@ -213,12 +330,12 @@ const EASY_FINISH = {
 const ACROSS_NOTE = 'Across means about 3 to 4 meters.';
 const GROWNUP_TIPS = 'Grown-up tips: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping.';
 /* On-screen clock. Starter and Stronger run about 15 to 18 minutes, so
- * both clocks are 18:00. Superhero runs about 20 to 22, so its clock is 22:00. */
+ * both clocks are 18:00. Superhero runs about 17 to 22, so its clock is 22:00. */
 const SESSION_MINUTES = { 1: 18, 2: 18, 3: 22 };
 const SESSION_LENGTH_LABELS = {
   1: 'About 15 to 18 minutes.',
   2: 'About 15 to 18 minutes.',
-  3: 'About 20 to 22 minutes.',
+  3: 'About 17 to 22 minutes.',
 };
 function sessionMinutes(phaseId) {
   const n = Number(phaseId);
@@ -249,7 +366,7 @@ const PHASES = [
     id: 3,
     name: 'Superhero',
     weeks: 'Level 3',
-    goal: 'About 20 to 22 minutes, with 3 rounds of legs and posture and 15 seconds of rest.',
+    goal: 'About 17 to 22 minutes, with 3 rounds of legs and posture and 15 seconds of rest.',
   },
 ];
 
@@ -275,6 +392,7 @@ function exerciseProgramEntry(base, order, level) {
     muscle_groups: base.muscle_groups, demos: base.demos, order: order,
     video_url: typeof base.video_url === 'string' ? base.video_url : '',
     loaded_knee_flexion: base.loaded_knee_flexion === true,
+    knee_bend: base.knee_bend === true,
     high_impact: base.high_impact === true,
   };
 }
@@ -328,7 +446,8 @@ function legTrios(legs) {
       }
     }
   }
-  return out;
+  const withKnees = out.filter(trio => trio.filter(e => e.knee_bend === true).length >= 2);
+  return withKnees.length ? withKnees : out;
 }
 /* True when the saved ids are one template pick: 2 warm-up (first not
  * high-impact), 3 legs with at most one high-impact, 2 posture, no
@@ -345,6 +464,9 @@ function isTemplateIds(ids) {
   const legs = exs.slice(2, 5);
   if (legs.some(e => e.section !== 'strength')) return false;
   if (legs.filter(e => e.high_impact === true).length > 1) return false;
+  const kneeRuleOn = legTrios(EXERCISES.filter(e => e.section === 'strength'))
+    .some(trio => trio.filter(e => e.knee_bend === true).length >= 2);
+  if (kneeRuleOn && legs.filter(e => e.knee_bend === true).length < 2) return false;
   const posture = exs.slice(5, 7);
   if (posture.some(e => e.section !== 'stability')) return false;
   for (let i = 1; i < exs.length; i++) {
@@ -402,8 +524,9 @@ function estimateSessionMinutes(level, ids) {
 }
 /* Block picker. randomFn defaults to Math.random and must return a number
  * in [0, 1). Warm-up is 2 distinct moves and the first is never high-impact.
- * Legs are 3 distinct moves with at most 1 high-impact. Posture is both
- * Tall Posture moves while the pool has 2, otherwise 2 of them. Big jumps
+ * Legs are 3 distinct moves with at most 1 high-impact, and at least 2
+ * knee-bending moves once a legal trio exists. Posture is both Tall
+ * Posture moves while the pool has 2, otherwise 2 of them. Big jumps
  * in that repeating block count once per round, and no round exceeds 2.
  * Two high-impact moves are never back to back. The easy finish is not
  * included here; programForState appends it. */
