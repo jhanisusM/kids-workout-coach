@@ -1,17 +1,17 @@
 # Kids Workout Coach
 
-A guided 20-minute bodyweight workout for kids 5 and older. Stronger thighs, taller posture, fun holds and animal moves.
+A bodyweight workout of about 15 to 20 minutes for kids 5 and older. Stronger thighs, taller posture, fun holds and animal moves.
 
 Run it here: https://jhanisusM.github.io/kids-workout-coach/
 
 ## What it is
 
-- 15 moves in 3 levels: Starter, Stronger, Superhero, 6 sessions per level. Each session picks 5 moves at random.
-- Warm-up play, strong legs, and tall posture.
+- 15 moves in 3 levels: Starter, Stronger, Superhero, 6 sessions per level. Each session is a template: 2 warm-up moves, 3 leg moves, 2 posture moves, then a 1-minute easy finish. The timer on screen is still 20:00.
+- Warm-up play, strong legs, and tall posture. Superkid is tall posture. Inchworm is warm-up. The leg and posture block is 1, 2, or 3 rounds by level, with 30, 20, or 15 seconds of rest.
+- Doses change by level (the lower council numbers). Across means about 3 to 4 meters. Dose numbers are a starting point. A pediatric physical therapist can check them.
 - Bodyweight only. No weights, no accounts, no tracking, no names or photos.
 - Progress is stored in the browser only, under its own key (kids-coach-v1), so it cannot mix with other workout apps.
-- A grown-up should stay nearby. Stop any move that hurts and tell a grown-up. This is a fun workout, not medical advice.
-- Dose numbers are a starting point. A pediatric physical therapist can check them.
+- A grown-up should stay nearby. Tips on the page: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping. This is a fun workout, not medical advice.
 
 ## What it is not
 
