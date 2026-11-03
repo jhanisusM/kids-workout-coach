@@ -245,14 +245,31 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     `[data-testid="demo-embed"]`.
   - Network: youtube-nocookie frames only. No CSP console violations
     from this page.
-- Safe rendering and storage: done. All text put into the page goes
-  through `esc()`. Saved data that cannot be parsed resets to a fresh
-  store with a notice, and the original is backed up first.
+- Safe rendering and storage: done. Screen: session message.
+  - Web test reference: page `index.html`. Reload with a saved session
+    that lists a removed move, and again with damaged saved data.
+  - Expected behavior: all text put into the page goes through `esc()`.
+    A saved session listing a removed move gets new moves and the
+    message 'Your saved workout was updated to the new moves.', while
+    damaged data still gets the reset notices. A saved session that
+    lists a removed move plus junk ids gets the partial-reset notice
+    ('Some saved data was unreadable and was reset. The rest of your
+    progress was kept.') rather than that soft notice. Saved data that
+    cannot be parsed resets to a fresh store
+    ('Saved data could not be read, so progress was reset to a fresh
+    start.'), and the original is backed up first.
+  - Key elements: `[data-testid="session-message"]`.
+  - Network: none.
 
 ## Automated tests
 
-- `npm test` (Node 18 or newer, no installs): checks the pool has 15
-  moves and no yoga content, every demo id resolves, every video is an
-  https YouTube link, embeds use youtube-nocookie with `rel=0`, the URL
-  guard rejects `javascript:` and http links, a session picks 5 distinct
-  moves, and corrupt saved data falls back safely.
+- `npm test` (Node 18 or newer, no installs): 10 checks. The pool has
+  15 moves and no yoga content, every demo id resolves, every video is
+  an https YouTube link, embeds use youtube-nocookie with `rel=0`, the
+  URL guard rejects `javascript:` and http links, a session picks 5
+  distinct moves, the removed-ids check confirms the dropped yoga moves
+  and videos are absent, the soft-notice check confirms a saved session
+  that listed a removed move gets new moves and 'Your saved workout was
+  updated to the new moves.', a saved session that lists a removed move
+  plus junk ids gets the partial-reset notice, and corrupt saved data
+  falls back safely.

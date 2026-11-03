@@ -599,17 +599,29 @@ function sanitizeSession(raw, present) {
     ? raw.startedAt
     : raw.deadline - SESSION_MS;
   /* A stored session program survives migration only as 5 valid distinct
-   * ids. A list that still names a removed move is dropped without calling
-   * the rest of the save unreadable. Anything else is dropped and repaired. */
+   * ids. A list whose only unknown ids are removed moves is replaced with
+   * new moves and a soft notice. Junk ids (or a non-array list) mark the
+   * save repaired so the partial-reset notice wins, even when a removed
+   * move is listed too. */
   let exerciseIds = undefined;
   let movesUpdated = false;
   if (Object.prototype.hasOwnProperty.call(raw, 'exerciseIds')) {
-    const listed = Array.isArray(raw.exerciseIds) ? raw.exerciseIds : [];
+    const listed = Array.isArray(raw.exerciseIds) ? raw.exerciseIds : null;
     const valid = validExerciseIds(raw.exerciseIds);
-    const citedRemoved = listed.some(id => typeof id === 'string' && REMOVED_MOVE_IDS.indexOf(id) !== -1);
-    if (valid.length === SESSION_PROGRAM_SIZE) exerciseIds = valid;
-    if (citedRemoved && !repaired) movesUpdated = true;
-    else if (valid.length !== SESSION_PROGRAM_SIZE) repaired = true;
+    if (!listed) {
+      repaired = true;
+    } else {
+      const junk = listed.some(id => {
+        if (typeof id !== 'string') return true;
+        if (REMOVED_MOVE_IDS.indexOf(id) !== -1) return false;
+        return !EXERCISE_BY_ID.has(id);
+      });
+      const citedRemoved = listed.some(id => typeof id === 'string' && REMOVED_MOVE_IDS.indexOf(id) !== -1);
+      if (valid.length === SESSION_PROGRAM_SIZE) exerciseIds = valid;
+      if (junk) repaired = true;
+      else if (citedRemoved && !repaired) movesUpdated = true;
+      else if (valid.length !== SESSION_PROGRAM_SIZE) repaired = true;
+    }
   }
   return {
     value: { state: state, startedAt: startedAt, deadline: raw.deadline, remainingMs: remaining, day: raw.day, exerciseIds: exerciseIds },

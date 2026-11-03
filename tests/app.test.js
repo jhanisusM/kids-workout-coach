@@ -93,6 +93,35 @@ test('a saved session that cited a removed move gets a soft update notice', () =
   assert.strictEqual(r.state.session.exerciseIds, undefined);
 });
 
+test('a removed move plus junk ids gets the partial-reset notice', () => {
+  const raw = JSON.stringify({
+    version: 3,
+    phase: 1,
+    unlockedPhase: 1,
+    phaseSessions: { 1: 2, 2: 0, 3: 0 },
+    checks: {},
+    collapsed: {},
+    completions: {},
+    activeDay: '2026-11-03',
+    workoutDays: [2, 4],
+    symptoms: {},
+    history: [],
+    session: {
+      state: 'running',
+      startedAt: 1,
+      deadline: 2,
+      day: '2026-11-03',
+      exerciseIds: ['hopscotch', 'butterfly-stretch', 'not-a-real-move'],
+    },
+  });
+  const r = api.loadStoreFromRaw(raw, new Date('2026-11-03T12:00:00'));
+  assert.strictEqual(r.notice, api.NOTICE_PARTIAL);
+  assert.strictEqual(r.notice, 'Some saved data was unreadable and was reset. The rest of your progress was kept.');
+  assert.notStrictEqual(r.notice, api.NOTICE_MOVES_UPDATED);
+  assert.strictEqual(r.state.phaseSessions[1], 2);
+  assert.strictEqual(r.state.session.exerciseIds, undefined);
+});
+
 test('corrupt saved data falls back to a fresh store', () => {
   const r = api.loadStoreFromRaw('{not json', new Date());
   assert.ok(r.state && typeof r.state === 'object');
