@@ -1141,7 +1141,7 @@ function videoEmbedHtml(ex) {
   const embed = nocookieEmbed(ex && ex.video_url);
   const watch = youtubeWatchUrl(ex && ex.video_url);
   if (!embed || !watch) return '';
-  return '<div class="video-frame"><iframe src="' + esc(embed) + '" title="' + esc('Demo: ' + ex.name) + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>' +
+  return '<div class="video-frame"><iframe src="' + esc(embed) + '" title="' + esc('Demo: ' + ex.name) + '" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-presentation" allow="encrypted-media; picture-in-picture; fullscreen"></iframe></div>' +
     '<a class="demo-watch" href="' + esc(watch) + '" target="_blank" rel="noopener noreferrer">Watch demo</a>';
 }
 
