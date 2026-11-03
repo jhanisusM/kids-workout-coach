@@ -127,11 +127,69 @@ EXERCISES.forEach(function (ex) {
 
 /* 3 levels, 6 sessions per level. A new session is a fixed block, not 5
  * random moves: 2 warm-up, 3 legs, 2 posture, then an easy finish that is
- * not in the exercise pool. Older saves with 5 ids still play those 5.
- * Doses stay the catalog doses until a later change. All moves are
+ * not in the exercise pool. Older saves with 5 ids still play those 5
+ * at their original catalog doses. A template session uses the level's
+ * rounds, rest, and doses. All moves are
  * bodyweight only, for kids 5 and older, with a grown-up nearby.
  */
 const SESSIONS_PER_PHASE = 6;
+
+/* Lower end of the council dose ranges. Warm-ups are timed. Jumps in the
+ * leg block are counted. minSlotSec is the planned time for a move when the
+ * dose itself is shorter, so cueing still counts toward 15 to 22 minutes. */
+const LEVEL_PLAN = {
+  1: { rounds: 1, restSec: 30, minSlotSec: 90 },
+  2: { rounds: 2, restSec: 20, minSlotSec: 52 },
+  3: { rounds: 3, restSec: 15, minSlotSec: 36 },
+};
+const WARMUP_DOSE = { 1: '30 sec', 2: '40 sec', 3: '45 sec' };
+const WARMUP_WORK = { 1: 30, 2: 40, 3: 45 };
+const JUMP_DOSE = { 1: '5 jumps', 2: '8 jumps', 3: '10 jumps' };
+const JUMP_WORK = { 1: 15, 2: 24, 3: 30 };
+const CRAWL_DOSE = { 1: '1 time across', 2: '2 times across', 3: '2 times across' };
+const CRAWL_WORK = { 1: 25, 2: 50, 3: 50 };
+const DONKEY_DOSE = { 1: '6 each side', 2: '8 each side', 3: '10 each side' };
+const DONKEY_WORK = { 1: 36, 2: 48, 3: 60 };
+const FLAMINGO_DOSE = { 1: '2 x 8 sec each side', 2: '2 x 10 sec each side', 3: '3 x 15 sec each side' };
+const FLAMINGO_WORK = { 1: 32, 2: 40, 3: 90 };
+const SUPERKID_DOSE = { 1: '2 x 8 sec', 2: '3 x 10 sec', 3: '3 x 15 sec' };
+const SUPERKID_WORK = { 1: 16, 2: 30, 3: 45 };
+
+function levelPlan(phaseId) {
+  return LEVEL_PLAN[normalizePhase(phaseId)];
+}
+function assignLevelDoses(ex) {
+  if (ex.section === 'warmup') {
+    ex.doses = WARMUP_DOSE;
+    ex.work = WARMUP_WORK;
+    return;
+  }
+  if (ex.id === 'bear-crawls' || ex.id === 'crab-walk') {
+    ex.doses = CRAWL_DOSE;
+    ex.work = CRAWL_WORK;
+    return;
+  }
+  if (ex.id === 'donkey-kicks') {
+    ex.doses = DONKEY_DOSE;
+    ex.work = DONKEY_WORK;
+    return;
+  }
+  if (ex.high_impact === true) {
+    ex.doses = JUMP_DOSE;
+    ex.work = JUMP_WORK;
+    return;
+  }
+  if (ex.id === 'flamingo-balance') {
+    ex.doses = FLAMINGO_DOSE;
+    ex.work = FLAMINGO_WORK;
+    return;
+  }
+  if (ex.id === 'superkid') {
+    ex.doses = SUPERKID_DOSE;
+    ex.work = SUPERKID_WORK;
+  }
+}
+EXERCISES.forEach(assignLevelDoses);
 
 /* Not a pool exercise. No video, and it is a slow march plus a shake-out,
  * not a stretch, a pose, or yoga. */
@@ -141,6 +199,7 @@ const EASY_FINISH = {
   name: 'Easy Finish',
   note: 'March slowly in place, tall and quiet, then shake out your arms and legs.',
   dose: '1 min',
+  work: { 1: 60, 2: 60, 3: 60 },
   muscle_groups: ['easy finish'],
   demos: [],
   video_url: '',
@@ -181,24 +240,27 @@ const LEGACY_PROGRAM_SIZE = 5;
 const TEMPLATE_PICK_COUNT = 7;
 const SESSION_PROGRAM_SIZE = LEGACY_PROGRAM_SIZE;
 
-function exerciseProgramEntry(base, order) {
+function exerciseProgramEntry(base, order, level) {
+  const useLevel = level && LEVEL_PLAN[level];
+  const dose = useLevel && base.doses && base.doses[level] ? base.doses[level] : base.dose;
   return {
     id: base.id, section: base.section, name: base.name, note: base.note,
-    dose: base.dose,
+    dose: dose,
     muscle_groups: base.muscle_groups, demos: base.demos, order: order,
     video_url: typeof base.video_url === 'string' ? base.video_url : '',
     loaded_knee_flexion: base.loaded_knee_flexion === true,
+    high_impact: base.high_impact === true,
   };
 }
-function fullPoolProgram() {
-  return EXERCISES.map((base, i) => exerciseProgramEntry(base, i));
+function fullPoolProgram(level) {
+  return EXERCISES.map((base, i) => exerciseProgramEntry(base, i, level));
 }
-function resolveProgram(ids) {
+function resolveProgram(ids, level) {
   const list = Array.isArray(ids) ? ids : [];
   return list.map((id, i) => {
     const base = EXERCISE_BY_ID.get(id);
     if (!base) throw new Error('unknown exercise in program: ' + id);
-    return exerciseProgramEntry(base, i);
+    return exerciseProgramEntry(base, i, level);
   });
 }
 function resolvePhase(phaseId) {
@@ -206,7 +268,7 @@ function resolvePhase(phaseId) {
   if (!phase) throw new Error('unknown phase: ' + phaseId);
   return {
     id: phase.id, name: phase.name, weeks: phase.weeks, goal: phase.goal,
-    sessions_target: SESSIONS_PER_PHASE, exercises: fullPoolProgram(),
+    sessions_target: SESSIONS_PER_PHASE, exercises: fullPoolProgram(phase.id),
   };
 }
 /* Distinct known ids only, in stored order. Anything else is not a valid
@@ -266,8 +328,40 @@ function isTemplateIds(ids) {
   }
   return highs <= 2;
 }
-function withFinish(entries) {
-  return entries.concat([exerciseProgramEntry(EASY_FINISH, entries.length)]);
+function withFinish(entries, level) {
+  return entries.concat([exerciseProgramEntry(EASY_FINISH, entries.length, level)]);
+}
+function workSeconds(ex, level) {
+  const L = normalizePhase(level);
+  if (ex && ex.work && typeof ex.work[L] === 'number') return ex.work[L];
+  return 30;
+}
+/* Planned length of one template session. Leg and posture moves repeat for
+ * the level's rounds. Each move takes at least minSlotSec so a short dose
+ * still includes time to get set. Rest sits between moves, not after the
+ * easy finish. */
+function estimateSessionSeconds(level, ids) {
+  const plan = levelPlan(level);
+  const L = normalizePhase(level);
+  const entries = resolveProgram(ids, L);
+  const sequence = entries.filter(e => e.section === 'warmup');
+  const legs = entries.filter(e => e.section === 'strength');
+  const posture = entries.filter(e => e.section === 'stability');
+  for (let r = 0; r < plan.rounds; r++) {
+    legs.forEach(e => sequence.push(e));
+    posture.forEach(e => sequence.push(e));
+  }
+  sequence.push(exerciseProgramEntry(EASY_FINISH, sequence.length, L));
+  let total = 0;
+  sequence.forEach((slot, i) => {
+    const base = slot.id === EASY_FINISH.id ? EASY_FINISH : EXERCISE_BY_ID.get(slot.id);
+    total += Math.max(workSeconds(base, L), plan.minSlotSec);
+    if (i < sequence.length - 1) total += plan.restSec;
+  });
+  return total;
+}
+function estimateSessionMinutes(level, ids) {
+  return estimateSessionSeconds(level, ids) / 60;
 }
 /* Block picker. randomFn defaults to Math.random and must return a number
  * in [0, 1). Warm-up is 2 distinct moves and the first is never high-impact.
@@ -301,14 +395,15 @@ function pickSessionExerciseIds(randomFn) {
  * Anything else gets one template pick written onto the session object,
  * so a reload keeps the same program. */
 function programForState(state) {
+  const level = normalizePhase(state && state.phase);
   const session = state ? state.session : null;
-  if (!sessionIsActive(session)) return fullPoolProgram();
+  if (!sessionIsActive(session)) return fullPoolProgram(level);
   const ids = validExerciseIds(session.exerciseIds);
   if (ids.length === LEGACY_PROGRAM_SIZE) return resolveProgram(ids);
-  if (isTemplateIds(ids)) return withFinish(resolveProgram(ids));
+  if (isTemplateIds(ids)) return withFinish(resolveProgram(ids, level), level);
   const picked = pickSessionExerciseIds();
   session.exerciseIds = picked;
-  return withFinish(resolveProgram(picked));
+  return withFinish(resolveProgram(picked, level), level);
 }
 function newSession(nowMs, day, randomFn) {
   return {
@@ -1176,6 +1271,21 @@ function renderTimer() {
     : 'No active session: press Start to begin.';
 }
 
+function renderSessionPlan() {
+  const el = $('sessionPlan');
+  if (!el) return;
+  const session = store.session;
+  const active = sessionIsActive(session);
+  const ids = active ? validExerciseIds(session.exerciseIds) : [];
+  const show = active && isTemplateIds(ids);
+  el.hidden = !show;
+  if (!show) return;
+  const plan = levelPlan(currentPhaseId());
+  const rounds = plan.rounds === 1 ? '1 round' : plan.rounds + ' rounds';
+  $('sessionRounds').textContent = 'Legs and posture: ' + rounds + '.';
+  $('sessionRest').textContent = 'Rest ' + plan.restSec + ' sec between moves.';
+}
+
 function renderProgress() {
   const n = checkedCount(), total = currentProgram().length;
   const active = sessionIsActive(store.session);
@@ -1277,7 +1387,7 @@ function renderSections() {
         '<span><span class="exercise-name">' + esc(e.name) + '</span>' +
         '<span class="exercise-note">' + esc(e.note) + '</span>' +
         '<span class="muscle-tags">' + tags + '</span></span>' +
-        '<span class="dose">' + esc(e.dose) + '</span></label>' +
+        '<span class="dose" data-testid="exercise-dose">' + esc(e.dose) + '</span></label>' +
         demoHtml(e) + '</div><div class="exercise-video">' + videoEmbedHtml(e) + '</div></div></li>';
     }).join('');
     const countLabel = exs.length === 1 ? '1 exercise' : exs.length + ' exercises';
@@ -1390,6 +1500,7 @@ function renderAll() {
   renderPhase();
   renderStatus();
   renderTimer();
+  renderSessionPlan();
   renderProgress();
   renderPrompts();
   renderSections();
@@ -1570,6 +1681,9 @@ if (typeof module !== 'undefined') {
     validExerciseIds: validExerciseIds,
     isTemplateIds: isTemplateIds,
     pickSessionExerciseIds: pickSessionExerciseIds,
+    levelPlan: levelPlan,
+    estimateSessionSeconds: estimateSessionSeconds,
+    estimateSessionMinutes: estimateSessionMinutes,
     programForState: programForState,
     programExerciseIds: programExerciseIds,
     newSession: newSession,

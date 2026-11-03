@@ -208,6 +208,49 @@ test('legacy 5-id session still loads and a new session stays put', () => {
   assert.ok(!EXERCISES.some(e => e.id === 'easy-finish'));
 });
 
+test('rounds, rest, and doses follow the level', () => {
+  const ids = ['running-in-place', 'hopscotch', 'bear-crawls', 'frog-jumps', 'donkey-kicks', 'flamingo-balance', 'superkid'];
+  assert.strictEqual(api.isTemplateIds(ids), true);
+  function dose(level, id) {
+    return api.programForState(storeWithSession(ids, level)).find(e => e.id === id).dose;
+  }
+  assert.deepEqual(api.levelPlan(1), { rounds: 1, restSec: 30, minSlotSec: 90 });
+  assert.deepEqual(api.levelPlan(2), { rounds: 2, restSec: 20, minSlotSec: 52 });
+  assert.deepEqual(api.levelPlan(3), { rounds: 3, restSec: 15, minSlotSec: 36 });
+  assert.strictEqual(dose(1, 'hopscotch'), '30 sec');
+  assert.strictEqual(dose(2, 'hopscotch'), '40 sec');
+  assert.strictEqual(dose(3, 'running-in-place'), '45 sec');
+  assert.strictEqual(dose(1, 'frog-jumps'), '5 jumps');
+  assert.strictEqual(dose(2, 'frog-jumps'), '8 jumps');
+  assert.strictEqual(dose(3, 'frog-jumps'), '10 jumps');
+  assert.strictEqual(dose(1, 'bear-crawls'), '1 time across');
+  assert.strictEqual(dose(2, 'bear-crawls'), '2 times across');
+  assert.strictEqual(dose(3, 'bear-crawls'), '2 times across');
+  assert.strictEqual(dose(1, 'donkey-kicks'), '6 each side');
+  assert.strictEqual(dose(3, 'donkey-kicks'), '10 each side');
+  assert.strictEqual(dose(1, 'flamingo-balance'), '2 x 8 sec each side');
+  assert.strictEqual(dose(2, 'flamingo-balance'), '2 x 10 sec each side');
+  assert.strictEqual(dose(3, 'flamingo-balance'), '3 x 15 sec each side');
+  assert.strictEqual(dose(1, 'superkid'), '2 x 8 sec');
+  assert.strictEqual(dose(2, 'superkid'), '3 x 10 sec');
+  assert.strictEqual(dose(3, 'superkid'), '3 x 15 sec');
+  assert.strictEqual(dose(1, 'easy-finish'), '1 min');
+  const legacy = api.programForState(storeWithSession(
+    ['hopscotch', 'step-jacks', 'bear-crawls', 'donkey-kicks', 'flamingo-balance'], 3));
+  assert.strictEqual(legacy.find(e => e.id === 'hopscotch').dose, '1 min');
+  assert.strictEqual(legacy.find(e => e.id === 'flamingo-balance').dose, '3 x 15 sec each side');
+});
+
+test('estimated session length stays between 15 and 22 minutes', () => {
+  for (const level of [1, 2, 3]) {
+    for (let n = 0; n < 1000; n++) {
+      const ids = api.pickSessionExerciseIds(mulberry32(level * 100000 + n + 1));
+      const minutes = api.estimateSessionMinutes(level, ids);
+      assert.ok(minutes >= 15 && minutes <= 22, 'level ' + level + ' ' + minutes);
+    }
+  }
+});
+
 test('corrupt saved data falls back to a fresh store', () => {
   const r = api.loadStoreFromRaw('{not json', new Date());
   assert.ok(r.state && typeof r.state === 'object');
