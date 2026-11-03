@@ -96,7 +96,7 @@ const VIDEO_LIBRARY = {
       id: 'v-kidsfitmotion-crab-walk',
       topic: 'kids-moves',
       title: '3 Animal Walks for Kids | Frog Jump, Crab Walk & Bear Walk | Fun Fitness Activity!',
-      creator: 'KidsFitMotion',
+      creator: 'Sushil Pro Fitness',
       handle: '',
       description: 'Kids animal walks video including Crab Walk.',
       url: 'https://www.youtube.com/shorts/SoM7xC60Loc'

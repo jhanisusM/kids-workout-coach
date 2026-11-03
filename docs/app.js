@@ -758,7 +758,7 @@ function pruneBackups(storage, keep) {
   });
   return { kept: keys.slice(0, Math.max(0, limit)), removed: removed };
 }
-/* The on-screen target and any later goal check stop at 9. Storage does not. */
+/* The on-screen target and any later goal check stop at SESSIONS_PER_PHASE. Storage does not. */
 function cappedSessionCount(count) {
   const n = Number(count);
   if (!Number.isFinite(n) || n <= 0) return 0;
@@ -1187,7 +1187,7 @@ function renderSections() {
     }).join('');
     const countLabel = exs.length === 1 ? '1 exercise' : exs.length + ' exercises';
     return '<section class="section' + (collapsed ? ' collapsed' : '') + (done ? ' complete' : '') + '">' +
-      '<button class="section-head" data-section="' + esc(sec.id) + '" data-testid="section-head">' +
+      '<button class="section-head" type="button" aria-expanded="' + (collapsed ? 'false' : 'true') + '" data-section="' + esc(sec.id) + '" data-testid="section-head">' +
       '<span class="section-title"><span class="step-no">' + String(stepNo).padStart(2, '0') + '</span>' +
       '<h3 class="section-heading">' + esc(sec.title) + '</h3>' +
       '<span class="block-tag">' + (sec.block === 'foundation' ? 'foundation block' : 'accessory block') + '</span></span>' +
