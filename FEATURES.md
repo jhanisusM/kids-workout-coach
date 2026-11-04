@@ -33,7 +33,7 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
     Switch levels before Start.
   - Expected behavior: pressing Start begins that level's countdown and
     keeps it across a page reload from one stored deadline. Starter and
-    Stronger are not padded to 20:00: both run about 15 to 18 minutes,
+    Stronger both run about 15 to 18 minutes,
     and both clocks are 18:00. Superhero runs about 20 to 22 minutes,
     and its clock is 22:00. Pause freezes the clock, Resume continues it.
     There is no day selection: Start works on any day, and the session
