@@ -135,12 +135,16 @@ EXERCISES.forEach(function (ex) {
 const SESSIONS_PER_PHASE = 6;
 
 /* Lower end of the council dose ranges. Warm-ups are timed. Jumps in the
- * leg block are counted. minSlotSec is the planned time for a move when the
- * dose itself is shorter, so cueing still counts toward 15 to 22 minutes. */
+ * leg block are counted. Session length is the real work (dose times reps
+ * or sides), the rests, the rounds, the warm-up, and the easy finish.
+ * Starter and Stronger both use 3 rounds so that real time is 15 to 18
+ * minutes. Stronger rests 15 seconds, not 20: with 3 rounds, 20 seconds
+ * of rest runs the longest plan past 18. Superhero is the same 3 rounds
+ * with harder doses, and that real time is 20 to 22 minutes. */
 const LEVEL_PLAN = {
-  1: { rounds: 1, restSec: 30, minSlotSec: 90 },
-  2: { rounds: 2, restSec: 20, minSlotSec: 52 },
-  3: { rounds: 3, restSec: 15, minSlotSec: 36 },
+  1: { rounds: 3, restSec: 30 },
+  2: { rounds: 3, restSec: 15 },
+  3: { rounds: 3, restSec: 15 },
 };
 const WARMUP_DOSE = { 1: '30 sec', 2: '40 sec', 3: '45 sec' };
 const WARMUP_WORK = { 1: 30, 2: 40, 3: 45 };
@@ -208,14 +212,13 @@ const EASY_FINISH = {
 
 const ACROSS_NOTE = 'Across means about 3 to 4 meters.';
 const GROWNUP_TIPS = 'Grown-up tips: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping.';
-/* On-screen clock. Starter and Stronger are not padded out to 20 minutes:
- * they run about 15 to 18, so the clock is 18:00. Superhero's longest plan
- * is past 21 minutes, so its clock is 22:00. */
+/* On-screen clock. Starter and Stronger run about 15 to 18 minutes, so
+ * both clocks are 18:00. Superhero runs about 20 to 22, so its clock is 22:00. */
 const SESSION_MINUTES = { 1: 18, 2: 18, 3: 22 };
 const SESSION_LENGTH_LABELS = {
   1: 'About 15 to 18 minutes.',
   2: 'About 15 to 18 minutes.',
-  3: 'About 22 minutes.',
+  3: 'About 20 to 22 minutes.',
 };
 function sessionMinutes(phaseId) {
   const n = Number(phaseId);
@@ -234,19 +237,19 @@ const PHASES = [
     id: 1,
     name: 'Starter',
     weeks: 'Level 1',
-    goal: 'About 15 to 18 minutes: warm-up, legs, tall posture, then an easy finish. One round of legs and posture. Bodyweight only, with a grown-up nearby.',
+    goal: 'About 15 to 18 minutes: warm-up, legs, tall posture, then an easy finish. Three rounds of legs and posture, with 30 seconds of rest. Bodyweight only, with a grown-up nearby.',
   },
   {
     id: 2,
     name: 'Stronger',
     weeks: 'Level 2',
-    goal: 'About 15 to 18 minutes, with 2 rounds of legs and posture and 20 seconds of rest.',
+    goal: 'About 15 to 18 minutes, with 3 rounds of legs and posture and 15 seconds of rest.',
   },
   {
     id: 3,
     name: 'Superhero',
     weeks: 'Level 3',
-    goal: 'About 22 minutes, with 3 rounds of legs and posture and 15 seconds of rest.',
+    goal: 'About 20 to 22 minutes, with 3 rounds of legs and posture and 15 seconds of rest.',
   },
 ];
 
@@ -372,9 +375,8 @@ function workSeconds(ex, level) {
   return 30;
 }
 /* Planned length of one template session. Leg and posture moves repeat for
- * the level's rounds. Each move takes at least minSlotSec so a short dose
- * still includes time to get set. Rest sits between moves, not after the
- * easy finish. */
+ * the level's rounds. Each move takes its real work time (reps or seconds),
+ * with no extra padding. Rest sits between moves, not after the easy finish. */
 function estimateSessionSeconds(level, ids) {
   const plan = levelPlan(level);
   const L = normalizePhase(level);
@@ -390,7 +392,7 @@ function estimateSessionSeconds(level, ids) {
   let total = 0;
   sequence.forEach((slot, i) => {
     const base = slot.id === EASY_FINISH.id ? EASY_FINISH : EXERCISE_BY_ID.get(slot.id);
-    total += Math.max(workSeconds(base, L), plan.minSlotSec);
+    total += workSeconds(base, L);
     if (i < sequence.length - 1) total += plan.restSec;
   });
   return total;

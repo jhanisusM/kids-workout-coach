@@ -34,14 +34,14 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Expected behavior: pressing Start begins that level's countdown and
     keeps it across a page reload from one stored deadline. Starter and
     Stronger are not padded to 20:00: both run about 15 to 18 minutes,
-    and both clocks are 18:00. Superhero is 22:00. Pause freezes the
-    clock, Resume continues it. There is no day selection: Start works
-    on any day, and the session logs the day it was started on. With no
-    session the session note says to press Start to begin, and the clock
-    shows the selected level. The page title says about 15 to 22
-    minutes. The session plan and the level goal match the clock: About
-    15 to 18 minutes on Starter and Stronger, About 22 minutes on
-    Superhero.
+    and both clocks are 18:00. Superhero runs about 20 to 22 minutes,
+    and its clock is 22:00. Pause freezes the clock, Resume continues it.
+    There is no day selection: Start works on any day, and the session
+    logs the day it was started on. With no session the session note says
+    to press Start to begin, and the clock shows the selected level. The
+    page title says about 15 to 22 minutes. The session plan and the
+    level goal match the clock: About 15 to 18 minutes on Starter and
+    Stronger, About 20 to 22 minutes on Superhero.
   - Key elements: `[data-testid="timer"]`, `[data-testid="btn-start"]`,
     `[data-testid="btn-pause"]`, `[data-testid="btn-resume"]`,
     `[data-testid="session-date"]`, `[data-testid="status-text"]`,
@@ -139,9 +139,10 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Web test reference: tap Level 2 or Level 3.
   - Expected behavior: the heading shows the level name (for example
     Level 1: Starter). The Starter and Stronger goals say about 15 to 18
-    minutes. Superhero says about 22 minutes. Level 1
-    is one round of legs and posture, Level 2 is 2 rounds with 20
-    seconds of rest, and Level 3 is 3 rounds with 15 seconds of rest.
+    minutes. Superhero says about 20 to 22 minutes. All three levels
+    are 3 rounds of legs and posture. Level 1 rests 30 seconds. Levels
+    2 and 3 rest 15 seconds (20 seconds of rest at 3 rounds would run
+    Stronger past 18 minutes).
     None of the goals say five random videos. Changing level while a
     session runs asks for confirmation first. Locked levels say what
     to complete first. The grown-up tips line is on this card.
@@ -305,8 +306,10 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   big jump counts once per round and no round exceeds 2 big-jump sets,
   that every warm-up and leg move appears, that a legacy 5-id save still
   loads, that a new session is stable across a reload, that rounds,
-  rest, and doses match the level, that Starter and Stronger stay about
-  15 to 18 minutes and Superhero stays within 22, that each level's
-  longest estimate fits inside that level's timer, that the
+  rest, and doses match the level, that the true shortest and longest
+  unpadded session at each level (every legal template, not a sample)
+  sits inside that level's label and inside 15 to 18 minutes for Starter
+  and Stronger, and that each level's timer is at least that longest
+  session, that the
   length, across, and grown-up copy is present with no in-app clinician
   note, and that corrupt saved data falls back safely.

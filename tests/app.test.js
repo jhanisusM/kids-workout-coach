@@ -217,9 +217,9 @@ test('rounds, rest, and doses follow the level', () => {
   function dose(level, id) {
     return api.programForState(storeWithSession(ids, level)).find(e => e.id === id).dose;
   }
-  assert.deepEqual(api.levelPlan(1), { rounds: 1, restSec: 30, minSlotSec: 90 });
-  assert.deepEqual(api.levelPlan(2), { rounds: 2, restSec: 20, minSlotSec: 52 });
-  assert.deepEqual(api.levelPlan(3), { rounds: 3, restSec: 15, minSlotSec: 36 });
+  assert.deepEqual(api.levelPlan(1), { rounds: 3, restSec: 30 });
+  assert.deepEqual(api.levelPlan(2), { rounds: 3, restSec: 15 });
+  assert.deepEqual(api.levelPlan(3), { rounds: 3, restSec: 15 });
   assert.strictEqual(dose(1, 'hopscotch'), '30 sec');
   assert.strictEqual(dose(2, 'hopscotch'), '40 sec');
   assert.strictEqual(dose(3, 'running-in-place'), '45 sec');
@@ -244,13 +244,84 @@ test('rounds, rest, and doses follow the level', () => {
   assert.strictEqual(legacy.find(e => e.id === 'flamingo-balance').dose, '3 x 15 sec each side');
 });
 
-test('estimated session length stays in the level window', () => {
+function permutations(items) {
+  if (items.length <= 1) return [items.slice()];
+  const out = [];
+  items.forEach((item, i) => {
+    permutations(items.slice(0, i).concat(items.slice(i + 1))).forEach(rest => {
+      out.push([item].concat(rest));
+    });
+  });
+  return out;
+}
+
+/* Every legal template, once per set of moves. Order does not change the
+ * estimate, so the first order that passes the template rules is enough. */
+function eachLegalTemplate(visit) {
+  const warm = EXERCISES.filter(e => e.section === 'warmup');
+  const easy = warm.filter(e => e.high_impact !== true);
+  const legs = EXERCISES.filter(e => e.section === 'strength');
+  const posture = EXERCISES.filter(e => e.section === 'stability');
+  const posturePairs = [];
+  if (posture.length <= 2) posturePairs.push(posture.map(e => e.id));
+  else {
+    for (let i = 0; i < posture.length; i++) {
+      for (let j = i + 1; j < posture.length; j++) posturePairs.push([posture[i].id, posture[j].id]);
+    }
+  }
+  let count = 0;
+  easy.forEach(first => {
+    warm.forEach(second => {
+      if (second.id === first.id) return;
+      for (let i = 0; i < legs.length; i++) {
+        for (let j = i + 1; j < legs.length; j++) {
+          for (let k = j + 1; k < legs.length; k++) {
+            const trioOrders = permutations([legs[i].id, legs[j].id, legs[k].id]);
+            posturePairs.forEach(pair => {
+              let found = null;
+              trioOrders.some(order => permutations(pair).some(post => {
+                const ids = [first.id, second.id].concat(order, post);
+                if (!api.isTemplateIds(ids)) return false;
+                found = ids;
+                return true;
+              }));
+              if (!found) return;
+              count += 1;
+              visit(found);
+            });
+          }
+        }
+      }
+    });
+  });
+  return count;
+}
+
+function labelRangeMinutes(label) {
+  const range = String(label).match(/(\d+)\s+to\s+(\d+)/);
+  if (range) return { low: Number(range[1]), high: Number(range[2]) };
+  const one = String(label).match(/(\d+)/);
+  const n = one ? Number(one[1]) : 0;
+  return { low: n, high: n };
+}
+
+test('every real session length sits inside the level label and timer', () => {
   for (const level of [1, 2, 3]) {
-    const cap = level === 3 ? 22 : 18;
-    for (let n = 0; n < 1000; n++) {
-      const ids = api.pickSessionExerciseIds(mulberry32(level * 100000 + n + 1));
-      const minutes = api.estimateSessionMinutes(level, ids);
-      assert.ok(minutes >= 15 && minutes <= cap, 'level ' + level + ' ' + minutes);
+    let minSec = Infinity;
+    let maxSec = 0;
+    const seen = eachLegalTemplate(ids => {
+      const sec = api.estimateSessionSeconds(level, ids);
+      if (sec < minSec) minSec = sec;
+      if (sec > maxSec) maxSec = sec;
+    });
+    assert.ok(seen > 0, 'level ' + level + ' has a template');
+    const range = labelRangeMinutes(api.sessionLengthLabel(level));
+    assert.ok(minSec + 1e-6 >= range.low * 60, 'level ' + level + ' shortest ' + minSec + ' is under ' + range.low);
+    assert.ok(maxSec <= range.high * 60 + 1e-6, 'level ' + level + ' longest ' + maxSec + ' is over ' + range.high);
+    assert.ok(api.sessionMs(level) >= maxSec * 1000, 'level ' + level + ' timer is short of ' + maxSec);
+    if (level < 3) {
+      assert.ok(minSec + 1e-6 >= 15 * 60, 'level ' + level + ' shortest ' + minSec);
+      assert.ok(maxSec <= 18 * 60 + 1e-6, 'level ' + level + ' longest ' + maxSec);
     }
   }
 });
@@ -260,7 +331,7 @@ test('copy names the session length, across, and grown-up tips', () => {
   assert.deepEqual(api.SESSION_MINUTES, { 1: 18, 2: 18, 3: 22 });
   assert.strictEqual(api.sessionLengthLabel(1), 'About 15 to 18 minutes.');
   assert.strictEqual(api.sessionLengthLabel(2), 'About 15 to 18 minutes.');
-  assert.strictEqual(api.sessionLengthLabel(3), 'About 22 minutes.');
+  assert.strictEqual(api.sessionLengthLabel(3), 'About 20 to 22 minutes.');
   assert.match(api.GROWNUP_TIPS, /soft landings/);
   assert.match(api.GROWNUP_TIPS, /knees not caving in/);
   assert.match(api.GROWNUP_TIPS, /flat back/);
@@ -279,8 +350,8 @@ test('copy names the session length, across, and grown-up tips', () => {
 test('a repeated big jump counts once per round, and no round exceeds 2', () => {
   const ids = ['running-in-place', 'hopscotch', 'bear-crawls', 'frog-jumps', 'donkey-kicks', 'flamingo-balance', 'superkid'];
   assert.strictEqual(api.isTemplateIds(ids), true);
-  assert.deepEqual(api.bigJumpSetsByRound(1, ids), { warmup: 1, rounds: [1] });
-  assert.deepEqual(api.bigJumpSetsByRound(2, ids), { warmup: 1, rounds: [1, 1] });
+  assert.deepEqual(api.bigJumpSetsByRound(1, ids), { warmup: 1, rounds: [1, 1, 1] });
+  assert.deepEqual(api.bigJumpSetsByRound(2, ids), { warmup: 1, rounds: [1, 1, 1] });
   assert.deepEqual(api.bigJumpSetsByRound(3, ids), { warmup: 1, rounds: [1, 1, 1] });
   const sets = api.bigJumpSetsByRound(3, ids);
   const total = sets.warmup + sets.rounds.reduce((sum, n) => sum + n, 0);
