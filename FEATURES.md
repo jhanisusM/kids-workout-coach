@@ -293,7 +293,10 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Expected behavior: all text put into the page goes through `esc()`.
     A saved session listing a removed move gets new moves and the
     message 'Your saved workout was updated to the new moves.', while
-    damaged data still gets the reset notices. A saved session that
+    damaged data still gets the reset notices. A saved session whose
+    ids are all real moves, but which is no longer a legal template
+    (for example only one knee-bending leg move), is rebuilt the same
+    way and shows that same soft notice. A saved session that
     lists a removed move plus junk ids gets the partial-reset notice
     ('Some saved data was unreadable and was reset. The rest of your
     progress was kept.') rather than that soft notice. Saved data that
@@ -305,13 +308,15 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 ## Automated tests
 
-- `npm test` (Node 18 or newer, no installs): 16 checks. The pool has
+- `npm test` (Node 18 or newer, no installs): 17 checks. The pool has
   25 moves and no yoga content, every demo id resolves, every video is
   an https YouTube link, embeds use youtube-nocookie with `rel=0`, and
   the URL guard rejects `javascript:` and http links. The removed-ids
   check confirms the dropped yoga moves and videos are absent. The
   soft-notice check confirms a saved session that listed a removed move
   gets new moves and 'Your saved workout was updated to the new moves.'
+  A saved 7-id template that is legal on the 15-move pool but fails the
+  knee-bend rule gets that same soft notice and a rebuilt legal session.
   A saved session that lists a removed move plus junk ids gets the
   partial-reset notice. It also runs 1000 seeded sessions per level and
   checks the template order, the high-impact rules, that each leg block

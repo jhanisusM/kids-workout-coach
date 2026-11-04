@@ -185,6 +185,21 @@ test('a saved session that cited a removed move gets a soft update notice', () =
   assert.strictEqual(r.state.session.exerciseIds, undefined);
 });
 
+test('a known template that is no longer legal gets the soft update notice', () => {
+  const oldIds = ['running-in-place', 'hopscotch', 'bear-crawls', 'frog-jumps', 'donkey-kicks', 'flamingo-balance', 'superkid'];
+  assert.strictEqual(api.isTemplateIds(oldIds), false);
+  oldIds.forEach(id => assert.ok(EXERCISES.some(e => e.id === id), id));
+  const r = api.loadStoreFromRaw(JSON.stringify(storeWithSession(oldIds, 1)), new Date('2026-11-03T12:00:00'));
+  assert.strictEqual(r.notice, api.NOTICE_MOVES_UPDATED);
+  assert.strictEqual(r.notice, 'Your saved workout was updated to the new moves.');
+  assert.notStrictEqual(r.notice, api.NOTICE_PARTIAL);
+  assert.strictEqual(r.state.phaseSessions[1], 0);
+  assert.ok(Array.isArray(r.state.session.exerciseIds));
+  assert.notDeepEqual(r.state.session.exerciseIds, oldIds);
+  assert.strictEqual(api.isTemplateIds(r.state.session.exerciseIds), true);
+  assert.deepEqual(api.programForState(r.state).map(e => e.id).slice(0, 7), r.state.session.exerciseIds);
+});
+
 test('a removed move plus junk ids gets the partial-reset notice', () => {
   const raw = JSON.stringify({
     version: 3,

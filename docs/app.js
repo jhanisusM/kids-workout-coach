@@ -937,10 +937,11 @@ function sanitizeSession(raw, present, phaseId) {
     : raw.deadline - sessionMs(phaseId);
   /* A stored program survives as 5 legacy ids or as 7 template ids.
    * A list whose only unknown ids are removed moves is replaced with
-   * new moves and a soft notice. Junk ids (or a non-array list) mark the
-   * save repaired so the partial-reset notice wins, even when a removed
-   * move is listed too. Anything else is dropped, and programForState
-   * writes a fresh template. */
+   * new moves and a soft notice. Known ids that no longer form a legal
+   * template (for example a save from before the knee-bend rule) are
+   * rebuilt the same way. Junk ids (or a non-array list) mark the save
+   * repaired so the partial-reset notice wins, even when a removed move
+   * is listed too. */
   let exerciseIds = undefined;
   let movesUpdated = false;
   if (Object.prototype.hasOwnProperty.call(raw, 'exerciseIds')) {
@@ -955,11 +956,15 @@ function sanitizeSession(raw, present, phaseId) {
         return !EXERCISE_BY_ID.has(id);
       });
       const citedRemoved = listed.some(id => typeof id === 'string' && REMOVED_MOVE_IDS.indexOf(id) !== -1);
+      const allKnown = listed.length > 0 && listed.every(id => typeof id === 'string' && EXERCISE_BY_ID.has(id));
       const usable = valid.length === LEGACY_PROGRAM_SIZE || isTemplateIds(valid);
       if (usable) exerciseIds = valid;
       if (junk) repaired = true;
       else if (citedRemoved && !repaired) movesUpdated = true;
-      else if (!usable) repaired = true;
+      else if (!usable && allKnown && !repaired) {
+        movesUpdated = true;
+        exerciseIds = pickSessionExerciseIds();
+      } else if (!usable) repaired = true;
     }
   }
   return {
