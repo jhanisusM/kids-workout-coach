@@ -1,12 +1,14 @@
 # Kids Workout Coach: FEATURES.md
 
-A guided 20-minute bodyweight workout for kids 5 and older. Stronger thighs,
-taller posture, fun holds and animal moves. Pure HTML, CSS, and JavaScript.
-No build step, no server, no accounts, no tracking. Progress lives in the
-browser's localStorage under the key `kids-coach-v1`. The exercise pool has
-15 moves; every session picks 5 of them at random (see Program below). The
-demo video library holds 14 verified video entries: no video URL has been
-invented, and a video is only added after it is opened and checked.
+A bodyweight workout of about 15 to 22 minutes for kids 5 and older. Stronger
+thighs, taller posture, fun holds and animal moves. Pure HTML, CSS, and
+JavaScript. No build step, no server, no accounts, no tracking. Progress
+lives in the browser's localStorage under the key `kids-coach-v1`. The
+exercise pool has 15 moves. A new session is a template, not 5 random
+moves: 2 warm-up, 3 legs, 2 posture, then a 1-minute easy finish that is
+not in the pool (see Session below). The demo video library holds 14
+verified video entries: no video URL has been invented, and a video is
+only added after it is opened and checked.
 Gorilla Squats is held out (unverified): it is not a programmed exercise
 and has no video entry.
 
@@ -25,41 +27,55 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 ## Session
 
-- 20-minute timer: done. Status: done. Screen: dashboard timer panel.
+- Per-level timer: done. Status: done.
+  Screen: dashboard timer panel.
   - Web test reference: page `index.html` (or the single-file preview).
-  - Expected behavior: pressing Start begins a 20:00 countdown that keeps
-    running across a page reload from one stored deadline. Pause freezes it,
-    Resume continues it. There is no day selection: Start works on any day,
-    and the session logs the day it was started on. With no session the
-    session note says to press Start to begin.
+    Switch levels before Start.
+  - Expected behavior: pressing Start begins that level's countdown and
+    keeps it across a page reload from one stored deadline. Starter and
+    Stronger both run about 15 to 18 minutes,
+    and both clocks are 18:00. Superhero runs about 20 to 22 minutes,
+    and its clock is 22:00. Pause freezes the clock, Resume continues it.
+    There is no day selection: Start works on any day, and the session
+    logs the day it was started on. With no session the session note says
+    to press Start to begin, and the clock shows the selected level. The
+    page title says about 15 to 22 minutes. The session plan and the
+    level goal match the clock: About 15 to 18 minutes on Starter and
+    Stronger, About 20 to 22 minutes on Superhero.
   - Key elements: `[data-testid="timer"]`, `[data-testid="btn-start"]`,
     `[data-testid="btn-pause"]`, `[data-testid="btn-resume"]`,
-    `[data-testid="session-date"]`, `[data-testid="status-text"]`.
+    `[data-testid="session-date"]`, `[data-testid="status-text"]`,
+    `[data-testid="session-length"]`.
   - Network: none.
-- Five random videos per session, locked until Finish or Clear: done.
+- Session template, locked until Finish or Clear: done.
   Screen: dashboard and routine.
-  - Web test reference: press Start, note the 5 moves, reload the page,
+  - Web test reference: press Start, note the moves, reload the page,
     then press Finish workout (or Clear session) and Start again.
   - Expected behavior: pressing Start (fresh start only, not Resume)
-    picks 5 distinct exercise ids uniformly at random from the
-    15-exercise pool, in picked order, with catalog doses. The session's
-    program is exactly those 5: progress reads n / 5, and checking all 5
-    (not all 15) gates the Finish prompt. Reloading, pausing, resuming,
-    and timer expiry all keep the same 5: the ids are stored on the
-    session (`session.exerciseIds`) and carried over when a session
-    expires. Finish (completed) and Clear (cleared) end the session, so
-    the next Start generates a fresh random 5; repeats across sessions
-    are allowed by chance. A stored session from before this feature
-    (no `exerciseIds`) gets one fresh random 5 generated once and saved,
-    so it stays stable across renders and reloads. The timer stays
-    20 minutes and the storage key stays `kids-coach-v1`.
+    builds one template and stores 7 catalog ids on `session.exerciseIds`.
+    Order is 2 warm-up (the first is never high-impact), 3 leg moves
+    (at most one high-impact), and 2 posture moves (Flamingo Balance and
+    Superkid while those are the only two). The easy finish is appended
+    on screen and is not stored. A big jump in the leg and posture block
+    counts once every round, and no round has more than 2 big-jump sets.
+    Warm-up is played once. Two high-impact moves are never back to back,
+    and the session never starts with one. Progress reads n / 8, and
+    checking all 8 gates the Finish prompt. Reloading, pausing, resuming,
+    and timer expiry keep the same ids. Finish and Clear end the session,
+    so the next Start builds a new template. A saved session from before
+    this template (exactly 5 catalog ids) still plays those 5, with the
+    old catalog doses, and does not show the round plan. A session with
+    no usable ids gets one template written once and saved. The storage
+    key stays `kids-coach-v1`.
   - Key elements: `[data-testid="progress-count"]`,
     `[data-testid="status-count"]`, `[data-testid="exercise-check"]`,
-    `[data-testid="finish-confirm"]`, `[data-testid="btn-start"]`.
+    `[data-testid="finish-confirm"]`, `[data-testid="btn-start"]`,
+    `[data-testid="session-plan"]`, `[data-testid="session-rounds"]`,
+    `[data-testid="session-rest"]`, `[data-testid="exercise-dose"]`.
   - Network: none.
 - Finish workout with star message: done. Screen: dashboard.
-  - Web test reference: check every exercise in a running session (all 5
-    picked moves), then press Finish workout.
+  - Web test reference: check every exercise in a running session (the
+    template moves, including Easy Finish), then press Finish workout.
   - Expected behavior: a finish prompt appears once all moves are checked.
     Finishing logs the day once and shows a star message. No pain score, no
     swelling score, no volume cut, no next-morning check-in.
@@ -72,8 +88,8 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Expected behavior: an expiry prompt offers Log anyway or Discard.
     An expired session never traps the timer: Start stays visible, and
     pressing Start abandons the expired session without logging it and
-    starts a fresh 20:00 session with a fresh random 5 and checkboxes
-    reset. Expiry itself preserves the old session's 5 until then. Checkboxes stay
+    starts a fresh session on that level's clock with a new template and checkboxes
+    reset. Expiry itself preserves the old session's moves until then. Checkboxes stay
     until Log anyway, Discard, or a fresh Start.
   - Key elements: `[data-testid="expiry-confirm"]`,
     `[data-testid="btn-expire-log"]`, `[data-testid="btn-expire-discard"]`,
@@ -95,15 +111,19 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Web test reference: look at the routine before starting, then start
     a session and check moves off.
   - Expected behavior: with no session, the routine shows the full
-    15-exercise pool (warm-up play, strong legs, tall posture), each with steps and a dose label, and progress reads
-    0 / 15 with the 'Start a session' note. During a session it shows
-    only the 5 picked moves, and checking updates the counts to n / 5.
-    Doses are the catalog doses in both cases: levels no longer override
-    them. Checkboxes are disabled before a session starts, and the
+    15-exercise pool (warm-up play, strong legs, tall posture). Inchworm
+    is under warm-up and Superkid is under tall posture. Progress reads
+    0 / 15. Doses shown are the selected level's doses. During a template
+    session the routine shows the 7 picks plus Easy Finish (n / 8), and
+    the session plan shows the level's rounds and rest. A legacy 5-id
+    session shows those 5 at the old catalog doses and hides the round
+    plan. Checkboxes are disabled before a session starts, and the
     progress note says to start a session first.
   - Key elements: `[data-testid="routine"]`,
     `[data-testid="exercise-check"]`, `[data-testid="progress-count"]`,
-    `[data-testid="progress-note"]`, `[data-testid="status-count"]`.
+    `[data-testid="progress-note"]`, `[data-testid="status-count"]`,
+    `[data-testid="exercise-dose"]`, `[data-testid="session-rounds"]`,
+    `[data-testid="session-rest"]`.
   - Network: none.
 - Collapsible sections: done. Screen: routine.
   - Web test reference: tap a section header.
@@ -118,12 +138,14 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 - Level picker (Starter, Stronger, Superhero): done. Screen: levels card.
   - Web test reference: tap Level 2 or Level 3.
   - Expected behavior: the heading shows the level name (for example
-    Level 1: Starter). Levels count sessions only: Level 1's goal is
-    'Five random videos every session. Bodyweight only, with a grown-up
-    nearby.', Level 2's is 'Keep going: five new random videos every
-    session.', and Level 3's is 'Superhero sessions: five random videos
-    every time.' Changing level while a session runs asks for
-    confirmation first. Locked levels say what to complete first.
+    Level 1: Starter). The Starter and Stronger goals say about 15 to 18
+    minutes. Superhero says about 20 to 22 minutes. All three levels
+    are 3 rounds of legs and posture. Level 1 rests 30 seconds. Levels
+    2 and 3 rest 15 seconds (20 seconds of rest at 3 rounds would run
+    Stronger past 18 minutes).
+    None of the goals say five random videos. Changing level while a
+    session runs asks for confirmation first. Locked levels say what
+    to complete first. The grown-up tips line is on this card.
   - Key elements: `[data-testid="phase-title"]`,
     `[data-testid="level-btn-1"]`, `[data-testid="level-btn-2"]`,
     `[data-testid="level-btn-3"]`, `[data-testid="phase-confirm"]`,
@@ -131,11 +153,17 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
   - Network: none.
 - Progression, 6 sessions per level: done. Screen: levels card.
   - Web test reference: finish sessions and watch the per-level rows.
-  - Expected behavior: each level tracks sessions toward 6 of 6. The
-    level rows count sessions only; there are no per-level move lists
-    and no week-based dose changes anymore.
+  - Expected behavior: each level tracks sessions toward 6 of 6. Rounds,
+    rest, and doses change with the level. There is no separate move
+    list per level: the same pool is picked from, with that level's
+    numbers. Starter doses include warm-ups at 30 sec, jumps at 5,
+    crawls at 1 time across, Flamingo at 2 x 8 sec each side, and
+    Superkid at 2 x 8 sec. Stronger uses 40 sec, 8 jumps, 2 times
+    across, 2 x 10 sec each side, and 3 x 10 sec. Superhero uses 45 sec,
+    10 jumps, 2 times across, 3 x 15 sec each side, and 3 x 15 sec.
   - Key elements: `[data-testid="phase-progress"]`,
-    `[data-testid="phase-goal"]`, `[data-testid="week-note"]`.
+    `[data-testid="phase-goal"]`, `[data-testid="week-note"]`,
+    `[data-testid="grownup-tips"]`, `[data-testid="across-note"]`.
   - Network: none.
 - Advance after 6 sessions: done. Screen: levels card.
   - Web test reference: log 6 sessions, then Advance.
@@ -176,7 +204,9 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 - All the moves, with demo videos: done. Screen: moves directory.
   - Web test reference: scroll to All the moves.
-  - Expected behavior: one row per move for all 15 pool moves, backed by
+  - Expected behavior: one row per move for all 15 pool moves. Easy
+    Finish is not in this list. Inchworm is a warm-up move and Superkid
+    is a tall-posture move. The list is backed by
     14 library entries (Hopscotch and Step Jacks share one Little Sports
     video). YouTube watch-URL picks play inline via youtube-nocookie
     embeds; the 4 Shorts picks (Bear Crawls, Frog Jumps, Star Jumps,
@@ -263,13 +293,23 @@ demo links. Use the `data-testid` selectors below, not class names or deep CSS p
 
 ## Automated tests
 
-- `npm test` (Node 18 or newer, no installs): 10 checks. The pool has
+- `npm test` (Node 18 or newer, no installs): 16 checks. The pool has
   15 moves and no yoga content, every demo id resolves, every video is
-  an https YouTube link, embeds use youtube-nocookie with `rel=0`, the
-  URL guard rejects `javascript:` and http links, a session picks 5
-  distinct moves, the removed-ids check confirms the dropped yoga moves
-  and videos are absent, the soft-notice check confirms a saved session
-  that listed a removed move gets new moves and 'Your saved workout was
-  updated to the new moves.', a saved session that lists a removed move
-  plus junk ids gets the partial-reset notice, and corrupt saved data
-  falls back safely.
+  an https YouTube link, embeds use youtube-nocookie with `rel=0`, and
+  the URL guard rejects `javascript:` and http links. The removed-ids
+  check confirms the dropped yoga moves and videos are absent. The
+  soft-notice check confirms a saved session that listed a removed move
+  gets new moves and 'Your saved workout was updated to the new moves.'
+  A saved session that lists a removed move plus junk ids gets the
+  partial-reset notice. It also runs 1000 seeded sessions per level and
+  checks the template order, the high-impact rules, that a repeated
+  big jump counts once per round and no round exceeds 2 big-jump sets,
+  that every warm-up and leg move appears, that a legacy 5-id save still
+  loads, that a new session is stable across a reload, that rounds,
+  rest, and doses match the level, that the true shortest and longest
+  unpadded session at each level (every legal template, not a sample)
+  sits inside that level's label and inside 15 to 18 minutes for Starter
+  and Stronger, and that each level's timer is at least that longest
+  session, that the
+  length, across, and grown-up copy is present with no in-app clinician
+  note, and that corrupt saved data falls back safely.
