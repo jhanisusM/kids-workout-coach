@@ -145,6 +145,33 @@ const VIDEO_LIBRARY = {
       handle: '',
       description: 'Kids exercises video; windmill is the first move.',
       url: 'https://www.youtube.com/watch?v=FB5-7tIiX-I'
+    },
+    {
+      id: 'v-andy-kids-squat',
+      topic: 'kids-moves',
+      title: 'How to SQUAT - Active Moves for Kids!',
+      creator: '519Andy',
+      handle: '',
+      description: 'Kids squat demo: sit the hips back and down, then stand tall.',
+      url: 'https://www.youtube.com/watch?v=GD2F5sqsK1o'
+    },
+    {
+      id: 'v-livelean-kids-strength',
+      topic: 'kids-moves',
+      title: '20 Minute Kids Strength Training Program At Home',
+      creator: 'Live Lean TV',
+      handle: '',
+      description: 'One kids strength circuit shared by Low Step-Ups, Wall Sit, and Reverse Lunge. The video names step-ups and wall sits, and alternating lunges (the channel write-up calls those reverse lunges). Not a separate demo per move, and no chapter times are marked.',
+      url: 'https://www.youtube.com/watch?v=zMSx6K3mcvY'
+    },
+    {
+      id: 'v-cchmc-bird-dog',
+      topic: 'kids-moves',
+      title: 'HealthWorks! Youth Fitness 201 - Bird Dog',
+      creator: "Cincinnati Children's",
+      handle: '',
+      description: 'Youth bird dog: hands and knees, opposite arm and leg, flat back, eyes down.',
+      url: 'https://www.youtube.com/watch?v=kGPVyMPpEQo'
     }
   ]
 };
