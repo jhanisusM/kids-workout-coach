@@ -1,21 +1,37 @@
 # Kids Workout Coach
 
 A guided bodyweight workout for kids 5 and older, one move at a time.
-Stronger thighs, taller posture, fun holds and animal moves. Press Start
-once and the app runs the whole session.
+Pick a story theme, then press Start and the app runs the whole session.
 
 Run it here: https://jhanisusM.github.io/kids-workout-coach/
 
 ## What a session looks like
 
-- **Warm-up:** 4 moves (a pulse raiser, one more warm-up move, Arm Circles,
-  and a coordination move).
-- **Main:** 6 moves, done twice: 3 thigh moves, 2 posture moves, and 1 play
-  move. A water break sits between the rounds.
-- **Cool-down:** Slow March, Wall Stand, Wall Angels, Flamingo Balance.
+Pick today's adventure first. Each theme is a short story wrapped around a
+body focus:
 
-Picks are random from Ask AI's 48-move list, so sessions vary. Starter runs
-about 16 to 18 minutes, Stronger about 17 to 21, Superhero about 19 to 24.
+- **Jungle Explorer:** strong legs. Trek through the jungle. Strong legs
+  carry you over roots and vines.
+- **Superhero Training:** tall posture. Train like a superhero. Stand tall,
+  reach long, and keep a strong back.
+- **Space Mission:** balance. You are on a spacewalk. Slow, steady steps
+  keep you steady out there.
+- **Animal Parade:** whole-body mix. Join the animal parade. Move like a
+  different animal in each part of the walk.
+- **Ocean Adventure:** strong arms and a steady body. Dive in and move
+  through the waves. Strong arms and a steady body help you swim.
+- **Playground Games:** coordination and play. Recess is on. Play the
+  games, keep the landings quiet, and have fun.
+
+Every session still has 4 warm-up moves, 6 main moves done twice (with a
+water break between rounds), and 4 cool-down moves, chosen to fit the
+story. Main moves come mostly from that theme's focus. Animal Parade keeps
+the mixed shape: 3 thigh moves, 2 posture moves, and 1 play move. Each
+move shows a themed name next to the real exercise name, and keeps its
+original demo video.
+
+Starter runs about 16 to 18 minutes, Stronger about 17 to 21, Superhero
+about 19 to 24, at every theme.
 
 Levels: Starter has no jumps and uses Sit-to-Stand. Frog Jumps start at
 Stronger. Star Jumps are Superhero only. Wall Sit holds 10, 20, or 30
@@ -51,20 +67,22 @@ them.
 ## Privacy
 
 Bodyweight only. No accounts, no tracking, no names or photos. Progress
-(level, sessions, trained days) is stored in this browser under
-`kids-coach-v1`, and an active session under `kwc-guided-session-v1` until
-it ends. Saves from earlier versions load with their progress kept. If the
-browser refuses to save, the page says so and the workout still runs.
+(level, sessions, trained days, and the last theme) is stored in this
+browser under `kids-coach-v1`, and an active session under
+`kwc-guided-session-v1` until it ends. Saves from earlier versions load
+with their progress kept. If the browser refuses to save, the page says so
+and the workout still runs.
 
 ## Files
 
-- `docs/index.html`, `docs/app.js` (progress, levels, page wiring),
-  `docs/program.js` (moves and session builder), `docs/styles.css`,
-  `docs/favicon.svg`.
+- `docs/index.html`, `docs/app.js` (progress, levels, theme menu, page
+  wiring), `docs/program.js` (moves, themes, and session builder),
+  `docs/styles.css`, `docs/favicon.svg`.
 - `docs/session-engine.js`, `docs/session-screens.js`, `docs/session.css`:
   the guided session, shared byte-for-byte with Adaptive Workout Coach and
   checked by `tests/shared-files.test.js` against `shared-files.sha256`.
 - `docs/specs/guided-session.md`: the session spec.
+  `docs/specs/pick-focus.md`: the theme picker spec.
 - `tests/`: run `npm ci && npm test` (Node 18 or newer, no runtime
   dependencies).
 - `FEATURES.md`: every feature with its status and a web test reference.

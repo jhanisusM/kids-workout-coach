@@ -7,7 +7,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <title>Kids Workout Coach: a guided workout, one move at a time</title>
-<meta name="description" content="Kids Workout Coach: a guided bodyweight workout for kids 5 and older. Warm-up, strong legs and tall posture, then a cool-down, one move at a time.">
+<meta name="description" content="Kids Workout Coach: a guided bodyweight workout for kids 5 and older. Pick a story theme, then warm-up, main moves, and a cool-down, one move at a time.">
 <link rel="stylesheet" href="session.css">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -15,7 +15,7 @@
 <main class="page">
   <header class="intro">
     <h1 class="app-title">Kids workout</h1>
-    <p class="lede hide-unless-idle">Warm-up, strong legs and tall posture, then a cool-down. Bodyweight only, for kids 5 and older, with a grown-up nearby.</p>
+    <p class="lede hide-unless-idle">Pick an adventure, then press Start. Bodyweight only, for kids 5 and older, with a grown-up nearby.</p>
   </header>
 
   <p class="app-notice" id="appNotice" role="status" data-testid="app-notice" hidden></p>
@@ -28,6 +28,12 @@
       <button type="button" class="level-btn" data-level="3" data-testid="level-btn-3"><strong>Level 3</strong><span>Superhero</span><span class="level-lock"></span></button>
     </div>
     <p class="level-label" id="levelLabel" data-testid="level-label"></p>
+  </div>
+
+  <div class="hide-unless-idle theme-picker" role="group" aria-labelledby="themeHeading">
+    <div class="panel-label" id="themeHeading">Pick today's adventure</div>
+    <div class="theme-grid" id="themeGrid" data-testid="theme-grid"></div>
+    <p class="theme-intro" id="themeIntro" data-testid="theme-intro"></p>
   </div>
 
   <div id="session" data-testid="session-root"></div>
