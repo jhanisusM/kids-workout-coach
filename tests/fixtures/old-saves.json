@@ -1,0 +1,251 @@
+{
+ "kids-main": {
+  "version": 3,
+  "session": {
+   "state": "running",
+   "startedAt": 1794247200000,
+   "deadline": 1794248400000,
+   "remainingMs": null,
+   "day": "2026-11-09",
+   "exerciseIds": [
+    "arm-circles",
+    "step-jacks",
+    "crab-walk",
+    "inchworm",
+    "high-knees"
+   ]
+  },
+  "checks": {
+   "arm-circles": true
+  },
+  "collapsed": {},
+  "workoutDays": [
+   2,
+   4
+  ],
+  "completions": {
+   "2026-11-03": true,
+   "2026-11-05": true
+  },
+  "activeDay": "2026-11-09",
+  "phase": 2,
+  "phaseSessions": {
+   "1": 6,
+   "2": 3,
+   "3": 0
+  },
+  "unlockedPhase": 2,
+  "symptoms": {},
+  "history": [
+   {
+    "type": "advance",
+    "from": 1,
+    "to": 2,
+    "at": "2026-11-01T18:00:00.000Z"
+   }
+  ]
+ },
+ "kids-main-idle": {
+  "version": 3,
+  "session": null,
+  "checks": {},
+  "collapsed": {},
+  "workoutDays": [
+   2,
+   4
+  ],
+  "completions": {
+   "2026-11-03": true,
+   "2026-11-05": true
+  },
+  "activeDay": "2026-11-09",
+  "phase": 2,
+  "phaseSessions": {
+   "1": 6,
+   "2": 3,
+   "3": 0
+  },
+  "unlockedPhase": 2,
+  "symptoms": {},
+  "history": [
+   {
+    "type": "advance",
+    "from": 1,
+    "to": 2,
+    "at": "2026-11-01T18:00:00.000Z"
+   }
+  ]
+ },
+ "kids-session-template": {
+  "version": 3,
+  "session": {
+   "state": "running",
+   "startedAt": 1794247200000,
+   "deadline": 1794248280000,
+   "remainingMs": null,
+   "day": "2026-11-09",
+   "exerciseIds": [
+    "arm-circles",
+    "invisible-jump-rope",
+    "donkey-kicks",
+    "bear-crawls",
+    "star-jumps",
+    "flamingo-balance",
+    "superkid"
+   ]
+  },
+  "checks": {
+   "arm-circles": true
+  },
+  "collapsed": {},
+  "workoutDays": [
+   2,
+   4
+  ],
+  "completions": {
+   "2026-11-03": true,
+   "2026-11-05": true
+  },
+  "activeDay": "2026-11-09",
+  "phase": 2,
+  "phaseSessions": {
+   "1": 6,
+   "2": 3,
+   "3": 0
+  },
+  "unlockedPhase": 2,
+  "symptoms": {},
+  "history": [
+   {
+    "type": "advance",
+    "from": 1,
+    "to": 2,
+    "at": "2026-11-01T18:00:00.000Z"
+   }
+  ]
+ },
+ "kids-session-template-idle": {
+  "version": 3,
+  "session": null,
+  "checks": {},
+  "collapsed": {},
+  "workoutDays": [
+   2,
+   4
+  ],
+  "completions": {
+   "2026-11-03": true,
+   "2026-11-05": true
+  },
+  "activeDay": "2026-11-09",
+  "phase": 2,
+  "phaseSessions": {
+   "1": 6,
+   "2": 3,
+   "3": 0
+  },
+  "unlockedPhase": 2,
+  "symptoms": {},
+  "history": [
+   {
+    "type": "advance",
+    "from": 1,
+    "to": 2,
+    "at": "2026-11-01T18:00:00.000Z"
+   }
+  ]
+ },
+ "kids-new-moves": {
+  "version": 3,
+  "session": {
+   "state": "running",
+   "startedAt": 1794247200000,
+   "deadline": 1794248280000,
+   "remainingMs": null,
+   "day": "2026-11-09",
+   "exerciseIds": [
+    "arm-circles",
+    "invisible-jump-rope",
+    "wall-sit",
+    "frog-jumps",
+    "low-step-ups",
+    "bird-dog",
+    "superkid"
+   ]
+  },
+  "checks": {
+   "arm-circles": true
+  },
+  "collapsed": {},
+  "workoutDays": [
+   2,
+   4
+  ],
+  "completions": {
+   "2026-11-03": true,
+   "2026-11-05": true
+  },
+  "activeDay": "2026-11-09",
+  "phase": 2,
+  "phaseSessions": {
+   "1": 6,
+   "2": 3,
+   "3": 0
+  },
+  "unlockedPhase": 2,
+  "symptoms": {},
+  "history": [
+   {
+    "type": "advance",
+    "from": 1,
+    "to": 2,
+    "at": "2026-11-01T18:00:00.000Z"
+   }
+  ]
+ },
+ "kids-new-moves-idle": {
+  "version": 3,
+  "session": null,
+  "checks": {},
+  "collapsed": {},
+  "workoutDays": [
+   2,
+   4
+  ],
+  "completions": {
+   "2026-11-03": true,
+   "2026-11-05": true
+  },
+  "activeDay": "2026-11-09",
+  "phase": 2,
+  "phaseSessions": {
+   "1": 6,
+   "2": 3,
+   "3": 0
+  },
+  "unlockedPhase": 2,
+  "symptoms": {},
+  "history": [
+   {
+    "type": "advance",
+    "from": 1,
+    "to": 2,
+    "at": "2026-11-01T18:00:00.000Z"
+   }
+  ]
+ },
+ "kids-v1-hand": {
+  "phase": 1,
+  "phaseSessions": {
+   "1": 4
+  },
+  "completions": {
+   "2026-09-01": true,
+   "2026-09-03": true
+  },
+  "session": null,
+  "thirdDay": true,
+  "clearance": true,
+  "checks": {}
+ }
+}

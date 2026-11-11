@@ -1,31 +1,71 @@
 # Kids Workout Coach
 
-A bodyweight workout of about 15 to 22 minutes for kids 5 and older. Stronger thighs, taller posture, fun holds and animal moves.
+A guided bodyweight workout for kids 5 and older, one move at a time.
+Stronger thighs, taller posture, fun holds and animal moves. Press Start
+once and the app runs the whole session.
 
 Run it here: https://jhanisusM.github.io/kids-workout-coach/
 
-## What it is
+## What a session looks like
 
-- 25 moves in 3 levels: Starter, Stronger, Superhero, 6 sessions per level. Each session is a template: 2 warm-up moves, 3 leg moves (at least 2 that bend the knee), 2 posture moves, then a 1-minute easy finish. Starter and Stronger run about 15 to 18 minutes (an 18:00 clock). Superhero runs about 17 to 22 minutes (a 22:00 clock).
-- Warm-up play, strong legs, and tall posture. Superkid is tall posture. Inchworm is warm-up. The leg and posture block is 3 rounds at every level. Starter rests 30 seconds. Stronger and Superhero rest 15 seconds. Length is the real work time plus rests, with no per-move padding.
-- Doses change by level (the lower council numbers). Across means about 3 to 4 meters. Dose numbers are a starting point. A pediatric physical therapist can check them.
-- Bodyweight only. No weights, no accounts, no tracking, no names or photos.
-- Progress is stored in the browser only, under its own key (kids-coach-v1), so it cannot mix with other workout apps.
-- A grown-up should stay nearby. Tips on the page: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping. This is a fun workout, not medical advice.
+- **Warm-up:** 4 moves (a pulse raiser, one more warm-up move, Arm Circles,
+  and a coordination move).
+- **Main:** 6 moves, done twice: 3 thigh moves, 2 posture moves, and 1 play
+  move. A water break sits between the rounds.
+- **Cool-down:** Slow March, Wall Stand, Wall Angels, Flamingo Balance.
 
-## What it is not
+Picks are random from Ask AI's 48-move list, so sessions vary. Starter runs
+about 16 to 18 minutes, Stronger about 17 to 21, Superhero about 19 to 24.
 
-- There is no Next-morning check-in, no pain score, and no swelling check in this app. Finish logs the day directly with a star message.
-- There is no yoga content. Yoga moves and yoga videos were removed.
+Levels: Starter has no jumps and uses Sit-to-Stand. Frog Jumps start at
+Stronger. Star Jumps are Superhero only. Wall Sit holds 10, 20, or 30
+seconds. Move up with Advance after 6 logged sessions; moving back is always
+allowed.
 
-## Demo videos
+## How it runs
 
-- 17 checked YouTube demos live in `docs/video-library.js`. Each was opened and checked as kid friendly, with the creator and move confirmed. No video URL has been invented. Sit to Stand, Wall Stand, Wall Angels, Prone Y and T Lifts, and Shoulder-Blade Squeezes ship with no video, because no kid-appropriate demo was found.
-- Embeds use youtube-nocookie with related videos limited to the same channel, and the player cannot open new tabs.
+- Rep moves wait for **Done**. Timed moves count down and move on by
+  themselves. Rests start by themselves and show what is up next, with
+  **Skip rest**.
+- **Pause / Resume**, **Skip exercise**, and **End** (with a confirm) are
+  always on screen, with a big main button above the fold on phones.
+- A reload picks up the same move and time. Finishing shows "Workout
+  complete" and puts a star on today in the week view.
+- One demo video at a time, never autoplaying, from YouTube's
+  privacy-enhanced domain. Round 2 shows no video.
+- The screen stays awake during a session where the browser supports it.
+
+## Safety
+
+A grown-up stays in the room. Clear about 2 meters of floor and use a
+non-slip surface with bare feet or grippy shoes. Stop for pain, dizziness,
+limping, or losing balance again and again. Jumps are soft, quiet, and
+two-footed. There is no yoga content.
+
+This is a fun workout, not medical advice. If your child has a heart, lung,
+bone, or joint condition, a recent injury or surgery, or a doctor has
+limited their activity, check with their doctor before starting. Dose
+numbers are a starting point; a pediatric physical therapist can check
+them.
+
+## Privacy
+
+Bodyweight only. No accounts, no tracking, no names or photos. Progress
+(level, sessions, trained days) is stored in this browser under
+`kids-coach-v1`, and an active session under `kwc-guided-session-v1` until
+it ends. Saves from earlier versions load with their progress kept. If the
+browser refuses to save, the page says so and the workout still runs.
 
 ## Files
 
-- `docs/index.html`, `docs/app.js`, `docs/styles.css`, `docs/video-library.js`, `docs/favicon.svg`
-- `tests/app.test.js`: run `npm test` (Node 18 or newer, nothing to install).
-- `FEATURES.md`: every feature with its status and a web test guide.
+- `docs/index.html`, `docs/app.js` (progress, levels, page wiring),
+  `docs/program.js` (moves and session builder), `docs/styles.css`,
+  `docs/favicon.svg`.
+- `docs/session-engine.js`, `docs/session-screens.js`, `docs/session.css`:
+  the guided session, shared byte-for-byte with Adaptive Workout Coach and
+  checked by `tests/shared-files.test.js` against `shared-files.sha256`.
+- `docs/specs/guided-session.md`: the session spec.
+- `tests/`: run `npm ci && npm test` (Node 18 or newer, no runtime
+  dependencies).
+- `FEATURES.md`: every feature with its status and a web test reference.
 - The live Pages site deploys from the `docs/` folder on `main`.
