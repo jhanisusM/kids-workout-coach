@@ -11,7 +11,7 @@
 
   const LS_KEY = 'kids-coach-v1';
   const SESSION_KEY = 'kwc-guided-session-v1';
-  const STORE_VERSION = 4;
+  const STORE_VERSION = 5;
   const BACKUP_KEEP = 3;
   const SESSIONS_PER_LEVEL = 6;
   const NOTICE_CORRUPT = 'Saved data could not be read, so progress was reset to a fresh start.';
@@ -54,7 +54,7 @@
 
   /* ---------- store ---------- */
   function defaultStore() {
-    return { version: STORE_VERSION, level: 1, unlockedLevel: 1, levelSessions: { 1: 0, 2: 0, 3: 0 }, completions: {}, history: [] };
+    return { version: STORE_VERSION, level: 1, unlockedLevel: 1, levelSessions: { 1: 0, 2: 0, 3: 0 }, completions: {}, history: [], lastTheme: KP.DEFAULT_THEME };
   }
 
   function sanitizeLevel(raw, present) {
@@ -108,11 +108,12 @@
   }
 
   /* Loads any save from the live app (v3, field names phase /
-   * unlockedPhase / phaseSessions) or this version (v4). Long-term
-   * progress is kept. Checklist-era fields (session, checks, collapsed,
-   * workoutDays, activeDay, symptoms, thirdDay, clearance) are dropped
-   * quietly: they described the old checklist screen. Only fields that are
-   * present and malformed trigger the partial notice. */
+   * unlockedPhase / phaseSessions), guided v4, or this version (v5).
+   * Long-term progress is kept. A missing or unknown last theme becomes
+   * Animal Parade, with no notice. Checklist-era fields (session, checks,
+   * collapsed, workoutDays, activeDay, symptoms, thirdDay, clearance) are
+   * dropped quietly. Only fields that are present and malformed trigger
+   * the partial notice. */
   function migrate(raw) {
     if (!isPlainObject(raw)) return { state: defaultStore(), changed: true, notice: NOTICE_CORRUPT };
     const v4 = raw.version === STORE_VERSION;
@@ -130,6 +131,7 @@
       if (n === 1 || n === 2 || n === 3) unlocked = Math.max(n, level.value);
       else unlockedRepaired = true;
     }
+    const lastTheme = KP.normalizeTheme(raw.lastTheme);
     const repaired = level.repaired || counts.repaired || completions.repaired || history.repaired || unlockedRepaired;
     const state = {
       version: STORE_VERSION,
@@ -138,6 +140,7 @@
       levelSessions: counts.value,
       completions: completions.value,
       history: history.value,
+      lastTheme: lastTheme,
     };
     const changed = JSON.stringify(state) !== JSON.stringify(raw);
     return { state: state, changed: changed, notice: repaired ? NOTICE_PARTIAL : null };
@@ -294,7 +297,7 @@
       storage: storage,
       storageKey: SESSION_KEY,
       allowNewMix: true,
-      getPlan: () => KP.buildSession({ level: store.level }),
+      getPlan: () => KP.buildSession({ level: store.level, theme: store.lastTheme }),
       onStatus: group => { doc.body.setAttribute('data-session', group); },
       onFinish: summary => {
         const result = logFinished(store, summary, new Date());
@@ -304,12 +307,49 @@
       },
     });
 
+    function renderThemes() {
+      const grid = $('themeGrid');
+      if (!grid.childElementCount) {
+        KP.THEMES.forEach(theme => {
+          const btn = doc.createElement('button');
+          btn.type = 'button';
+          btn.className = 'theme-btn';
+          btn.setAttribute('data-theme', theme.id);
+          btn.setAttribute('data-testid', 'theme-btn-' + theme.id);
+          const title = doc.createElement('strong');
+          title.textContent = theme.name;
+          const focus = doc.createElement('span');
+          focus.textContent = theme.focus;
+          btn.appendChild(title);
+          btn.appendChild(focus);
+          grid.appendChild(btn);
+        });
+      }
+      grid.querySelectorAll('[data-theme]').forEach(btn => {
+        const on = btn.getAttribute('data-theme') === store.lastTheme;
+        btn.classList.toggle('active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+      const theme = KP.themeById(store.lastTheme);
+      $('themeIntro').textContent = theme.intro;
+    }
+
     doc.addEventListener('click', ev => {
       const levelBtn = ev.target.closest('[data-level]');
       if (levelBtn && chooseLevel(store, levelBtn.getAttribute('data-level'))) {
         save();
         renderLevels();
         screens.refreshPlan();
+      }
+      const themeBtn = ev.target.closest('[data-theme]');
+      if (themeBtn) {
+        const next = KP.normalizeTheme(themeBtn.getAttribute('data-theme'));
+        if (next !== store.lastTheme) {
+          store.lastTheme = next;
+          save();
+          renderThemes();
+          screens.refreshPlan();
+        }
       }
     });
     $('advanceBtn').addEventListener('click', () => {
@@ -320,6 +360,7 @@
     });
 
     renderLevels();
+    renderThemes();
     renderCalendar();
     return { store: store, screens: screens };
   }

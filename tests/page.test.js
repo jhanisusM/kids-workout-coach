@@ -33,7 +33,7 @@ test('the checklist and the old video library are gone', () => {
 });
 
 test('the page has the hosts the session screens and the level picker need', () => {
-  ['session-root', 'app-notice', 'level-btn-1', 'level-btn-2', 'level-btn-3', 'level-label', 'btn-advance', 'week-grid', 'disclaimer-footer']
+  ['session-root', 'app-notice', 'level-btn-1', 'level-btn-2', 'level-btn-3', 'level-label', 'theme-grid', 'theme-intro', 'btn-advance', 'week-grid', 'disclaimer-footer']
     .forEach(id => assert.match(HTML, new RegExp('data-testid="' + id + '"'), id));
   assert.match(HTML, /<body data-session="idle">/);
 });

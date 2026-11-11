@@ -36,7 +36,8 @@ test('every earlier save loads with no notice and keeps level, sessions, days, a
 
 test('checklist-era fields are dropped quietly', () => {
   const r = App.loadStoreFromRaw(JSON.stringify(OLD['kids-new-moves']));
-  assert.deepStrictEqual(Object.keys(r.state).sort(), ['completions', 'history', 'level', 'levelSessions', 'unlockedLevel', 'version']);
+  assert.deepStrictEqual(Object.keys(r.state).sort(), ['completions', 'history', 'lastTheme', 'level', 'levelSessions', 'unlockedLevel', 'version']);
+  assert.strictEqual(r.state.lastTheme, 'animal-parade');
   assert.strictEqual(r.changed, true);
 });
 
@@ -104,4 +105,28 @@ test('Advance unlocks after 6 sessions; down is always allowed; up only to unloc
 test('progress and the running session use separate keys', () => {
   assert.strictEqual(App.LS_KEY, 'kids-coach-v1');
   assert.notStrictEqual(App.SESSION_KEY, App.LS_KEY);
+});
+
+
+const KP = require(path.join(__dirname, '..', 'docs', 'program.js'));
+
+test('the last picked theme is kept, and an unknown or missing value becomes Animal Parade with no notice', () => {
+  const kept = App.loadStoreFromRaw(JSON.stringify({
+    version: 5, level: 1, unlockedLevel: 1, levelSessions: { 1: 0, 2: 0, 3: 0 },
+    completions: {}, history: [], lastTheme: 'jungle-explorer',
+  }));
+  assert.strictEqual(kept.notice, null);
+  assert.strictEqual(kept.state.lastTheme, 'jungle-explorer');
+  const missing = App.loadStoreFromRaw(JSON.stringify({
+    version: 4, level: 2, unlockedLevel: 2, levelSessions: { 1: 6, 2: 0, 3: 0 },
+    completions: { '2026-11-03': true }, history: [],
+  }));
+  assert.strictEqual(missing.notice, null);
+  assert.strictEqual(missing.state.lastTheme, KP.DEFAULT_THEME);
+  const unknown = App.loadStoreFromRaw(JSON.stringify({
+    version: 5, level: 1, unlockedLevel: 1, levelSessions: { 1: 0, 2: 0, 3: 0 },
+    completions: {}, history: [], lastTheme: 'pirate-ship',
+  }));
+  assert.strictEqual(unknown.notice, null);
+  assert.strictEqual(unknown.state.lastTheme, KP.DEFAULT_THEME);
 });

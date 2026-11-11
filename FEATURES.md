@@ -1,9 +1,9 @@
 # Kids Workout Coach: FEATURES.md
 
-A guided bodyweight workout for kids 5 and older, one move at a time. Press
-Start once and the app runs warm-up, two rounds of strong-legs and
-tall-posture moves, then a cool-down, hands-free. Pure HTML, CSS, and
-JavaScript. No build step, no server, no accounts, no tracking.
+A guided bodyweight workout for kids 5 and older, one move at a time. Pick
+a story theme, press Start, and the app runs a warm-up, two rounds of
+themed moves, then a cool-down, hands-free. Pure HTML, CSS, and JavaScript.
+No build step, no server, no accounts, no tracking.
 
 Status is one of: done, removed.
 
@@ -12,14 +12,14 @@ Run the tests with `npm ci && npm test` (Node 18 or newer). The site in
 
 ## Where things live
 
-- `docs/index.html`: page layout, CSP, referrer policy, level picker, progress card.
+- `docs/index.html`: page layout, CSP, referrer policy, level picker, theme menu, progress card.
 - `docs/session-engine.js`: the guided session state machine (shared, hash-checked).
 - `docs/session-screens.js`: start, exercise, rest, and finish screens (shared, hash-checked).
 - `docs/session.css`: layout and session screen styles (shared, hash-checked).
-- `docs/program.js`: the 48-move pool from exercises-kids.json, doses by level, and the session builder.
-- `docs/app.js`: progress store (`kids-coach-v1`), migration of old saves, levels, calendar, page wiring.
-- `docs/styles.css`: kids colors and level picker. `docs/favicon.svg`: icon.
-- `docs/specs/guided-session.md`: the guided session spec.
+- `docs/program.js`: the 48-move pool from exercises-kids.json, doses by level, six story themes, and the session builder.
+- `docs/app.js`: progress store (`kids-coach-v1`, schema version 5), last theme, migration of old saves, levels, calendar, page wiring.
+- `docs/styles.css`: kids colors, level picker, and theme buttons. `docs/favicon.svg`: icon.
+- `docs/specs/guided-session.md`: the guided session spec. `docs/specs/pick-focus.md`: the theme picker spec.
 - `tests/`: `session-engine.test.js` (shared), `shared-files.test.js` (shared), `program.test.js`, `store.test.js`, `page.test.js`, fixtures.
 
 How to test in a browser: serve `docs/` (`cd docs && python3 -m http.server 8000`)
@@ -60,24 +60,31 @@ repos, and update both manifests (the command is in the test file header).
 
 | Feature | Status | Location | Web test reference |
 | --- | --- | --- | --- |
-| Session shape | done | `program.js` `buildSession` | Start screen breakdown: Warm-up 4, Main 12 (11 when Superhero runs long), Cool-down 4. `exercise-position` counts to 20 (or 19). |
-| Warm-up | done | `pickWarmup` | A pulse raiser, one more warm-up move, Arm Circles, then a coordination move. Starter never hops; other levels have at most one hopping warm-up move. 10 s rest between. |
-| Main: 6 moves x 2 rounds | done | `pickMainRound` | Round 1: 3 thigh moves (squat, single-leg, hold or hop), 2 posture moves, 1 play move. Round 2 repeats it with "Round 2." in the note and no demo. A "Water break" rest closes round 1. Rest 25 / 20 / 15 s by level. |
-| Cool-down | done | fixed list | Slow March, Wall Stand, Wall Angels, Flamingo Balance, 10 s rest between. |
-| Level rules | done | `doses`, `hopFrom` | Starter: no jumps (hop moves are marches or stepping), Sit-to-Stand instead of squats. Frog Jumps from Stronger. Star Jumps at Superhero only. Wall Sit 10 / 20 / 30 s. |
-| Honest length label | done | `app.js` `LEVEL_MINUTES`, `level-label` | "About 16 to 18 minutes at Starter", 17 to 21 at Stronger, 19 to 24 at Superhero. Tests check every generated session sits inside its label. |
-| Random picks | done | `buildSession({ rand })` | Each new session (and New mix) draws again. Tests use a seeded generator. |
+| Session shape | done | `program.js` `buildSession` | Start screen breakdown: Warm-up 4, Main 12 (11 when the session would pass 20:30), Cool-down 4. `exercise-position` counts to 20 (or 19). |
+| Themed warm-up and cool-down | done | `pickThemedWarmup` | Each theme picks 4 warm-up moves and 4 standing cool-down moves from its own pool. Starter never hops; other levels have at most one hopping warm-up move. 10 s rest between. |
+| Main: 6 moves x 2 rounds | done | `pickThemedMain` | Main moves come mostly from the theme's body focus (at least 4 of 6). Animal Parade keeps 3 thigh, 2 posture, and 1 play. Round 2 repeats round 1 with "Round 2." in the note and no demo. A "Water break" rest closes round 1. Rest 25 / 20 / 15 s by level. |
+| Themed names | done | `theme.lines`, `exercise-name`, `exercise-note` | Each move shows a themed display name with the real exercise name in parentheses, a short themed one-liner in the note, and the original video URL. |
+| Level rules | done | `doses`, `hopFrom` | Starter: no jumps (hop moves are marches or stepping), Sit-to-Stand instead of squats. Frog Jumps from Stronger. Star Jumps at Superhero only. Wall Sit 10 / 20 / 30 s when it appears. |
+| Honest length label | done | `app.js` `LEVEL_MINUTES`, `level-label` | "About 16 to 18 minutes at Starter", 17 to 21 at Stronger, 19 to 24 at Superhero, for every theme. Tests check every generated session sits inside its label. |
 | Keep / fix / replace | done | `MOVES` | Donkey Kicks replaced by Bird Dog. Running in Place merged into High Knees. Inchworm replaced by Hand Walk-Outs, with no downward-dog hold. No yoga moves. |
 | Library moves | done | role `library` | 12 moves from the JSON are kept with their URLs but not drawn into sessions yet (see README). |
+
+## Theme menu
+
+| Feature | Status | Location | Web test reference |
+| --- | --- | --- | --- |
+| Six story themes | done | `program.js` `THEMES`, `theme-grid` | On the start screen, before Start: Jungle Explorer (strong legs), Superhero Training (tall posture), Space Mission (balance), Animal Parade (whole-body mix), Ocean Adventure (strong arms and a steady body), Playground Games (coordination and play). Default is Animal Parade. |
+| Pick a theme | done | `theme-btn-<id>`, `theme-intro` | Tapping a theme button (`aria-pressed`) updates `theme-intro`, `session-title`, `time-estimate`, `exercise-count`, `phase-breakdown`, and `plan-list` at once. The theme menu and `btn-start` are visible without scrolling at 390x844. Hidden during a session. New mix redraws within the same theme. |
+| Last theme | done | `lastTheme` in `kids-coach-v1` | The last pick is stored and restored on load. An unknown value becomes Animal Parade, with no notice. |
 
 ## Levels and progress
 
 | Feature | Status | Location | Web test reference |
 | --- | --- | --- | --- |
-| Level picker | done | `level-btn-1..3` | Picking a level on the start screen rebuilds the session. Higher levels show "Locked" until Advance unlocks them. Hidden during a session. |
+| Level picker | done | `level-btn-1..3` | Picking a level on the start screen rebuilds the session in the current theme. Higher levels show "Locked" until Advance unlocks them. Hidden during a session. |
 | Advance after 6 sessions | done | `advanceDecision`, `btn-advance` | `advance-note` counts logged sessions. Moving back is always allowed. |
 | Logging | done | `logFinished` | Finishing with at least one exercise done marks today in `week-grid` and adds one session to the level (once per day). Ending early or skipping everything logs nothing. |
-| Old saves | done | `migrate` | Saves from main, PR #2, and PR #3 keep level, unlocked level, sessions per level, trained days, and advance history, with no notice. The old checklist session is dropped quietly. Broken saves reset with a notice and a backup key. |
+| Old saves | done | `migrate` | Saves from main, PR #2, PR #3, and guided v4 keep level, unlocked level, sessions per level, trained days, and advance history, with no notice, and default to Animal Parade. The old checklist session is dropped quietly. Broken saves reset with a notice and a backup key. |
 | Save failure | done | `app-notice` | If progress cannot be saved, `app-notice` says so. |
 
 ## Removed
