@@ -6,154 +6,57 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<title>Kids Workout Coach: about 15 to 22 minutes</title>
-<meta name="description" content="Kids Workout Coach: a guided workout of about 15 to 22 minutes for kids 5 and older. Stronger thighs, taller posture, fun holds and animal moves.">
+<title>Kids Workout Coach: a guided workout, one move at a time</title>
+<meta name="description" content="Kids Workout Coach: a guided bodyweight workout for kids 5 and older. Warm-up, strong legs and tall posture, then a cool-down, one move at a time.">
+<link rel="stylesheet" href="session.css">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<div class="page">
-  <div class="status-bar" id="statusBar" data-testid="status-bar">
-    <div class="status-state"><span class="status-dot"></span><span id="statusText" data-testid="status-text">Ready</span></div>
-    <div class="status-detail"><span id="statusDay" data-testid="status-day">Today</span><span id="statusCount" data-testid="status-count">0 / 25</span></div>
-    <div class="status-track"><div class="status-fill" id="statusFill"></div></div>
-  </div>
-
+<body data-session="idle">
+<main class="page">
   <header class="intro">
-    <div>
-      <div class="intro-top">
-        <h1>Kids workout, about 15 to 22 minutes</h1>
-        <div class="header-tools">
-          <button class="icon-btn" id="btnInfo" type="button" data-testid="btn-info" aria-label="How the workout is organized" aria-expanded="false" aria-controls="infoPanel">
-            <span class="icon-info" aria-hidden="true"></span>
-          </button>
-        </div>
-      </div>
-      <p class="lede">A fun 3-level program for kids 5 and older: warm-up play, strong legs, and tall posture. Bodyweight only, with animal moves and holds. Move up a level after 6 sessions.</p>
-      <p class="demo-badge">Kids app: progress is stored in this browser only. No names, no photos, no accounts.</p>
-    </div>
+    <h1 class="app-title">Kids workout</h1>
+    <p class="lede hide-unless-idle">Warm-up, strong legs and tall posture, then a cool-down. Bodyweight only, for kids 5 and older, with a grown-up nearby.</p>
   </header>
 
-  <div class="safety"><strong>Grown-ups, please stay nearby:</strong> this is a fun bodyweight workout for kids 5 and older, not medical advice. Stop any move that hurts and tell a grown-up. Short holds, soft landings, and breaks are part of the game.</div>
-  <p class="across-note" id="acrossNote" data-testid="across-note">Across means about 3 to 4 meters.</p>
+  <p class="app-notice" id="appNotice" role="status" data-testid="app-notice" hidden></p>
 
-  <section class="card phase-card" aria-label="Program level">
-    <div class="panel-label">Your levels</div>
-    <p class="draft-note" id="doseDraftNote" data-testid="grownup-tips">Grown-up tips: soft landings, knees not caving in, a flat back with the neck looking at the floor, a mat for crawls, and stop for pain, dizziness, or limping.</p>
-    <h2 id="phaseTitle" data-testid="phase-title">Level 1: Starter</h2>
-    <p class="muted" id="phaseGoal" data-testid="phase-goal"></p>
-    <p class="week-note" id="weekNote" data-testid="week-note"></p>
-    <div class="phase-picker" id="phasePicker" role="group" aria-label="Choose your level">
-      <button type="button" class="phase-btn" data-phase="1" data-testid="level-btn-1"><strong>Level 1</strong><span class="phase-name">Starter</span><span class="phase-lock"></span></button>
-      <button type="button" class="phase-btn" data-phase="2" data-testid="level-btn-2"><strong>Level 2</strong><span class="phase-name">Stronger</span><span class="phase-lock"></span></button>
-      <button type="button" class="phase-btn" data-phase="3" data-testid="level-btn-3"><strong>Level 3</strong><span class="phase-name">Superhero</span><span class="phase-lock"></span></button>
+  <div class="hide-unless-idle" role="group" aria-labelledby="levelHeading">
+    <div class="panel-label" id="levelHeading">Level</div>
+    <div class="level-picker">
+      <button type="button" class="level-btn" data-level="1" data-testid="level-btn-1"><strong>Level 1</strong><span>Starter</span><span class="level-lock"></span></button>
+      <button type="button" class="level-btn" data-level="2" data-testid="level-btn-2"><strong>Level 2</strong><span>Stronger</span><span class="level-lock"></span></button>
+      <button type="button" class="level-btn" data-level="3" data-testid="level-btn-3"><strong>Level 3</strong><span>Superhero</span><span class="level-lock"></span></button>
     </div>
-    <div class="phase-progress" id="phaseProgress" data-testid="phase-progress" aria-live="polite"></div>
-    <p class="advice" id="symptomAdvice" hidden></p>
-    <div class="advance" id="advanceWrap">
+    <p class="level-label" id="levelLabel" data-testid="level-label"></p>
+  </div>
+
+  <div id="session" data-testid="session-root"></div>
+
+  <section class="card hide-when-active" aria-labelledby="progressHeading">
+    <h2 id="progressHeading">Progress</h2>
+    <ul class="level-progress" id="levelProgress" data-testid="level-progress"></ul>
+    <div id="advanceWrap">
       <button class="btn" id="advanceBtn" type="button" data-testid="btn-advance">Advance to Level 2</button>
       <p class="muted small" id="advanceNote" data-testid="advance-note"></p>
     </div>
-    <p class="muted small">Moving back to an earlier level is always available. Moving up uses Advance, after 6 logged sessions. Changing level ends a running session, and you will be asked to confirm.</p>
-    <div class="prompt-bar danger" id="phaseConfirm" data-testid="phase-confirm">
-      <span id="phaseConfirmText"><strong>Change level?</strong> This ends the current session and clears its checkboxes.</span>
-      <span class="prompt-actions">
-        <button class="btn danger" id="btnPhaseYes" type="button" data-testid="btn-phase-yes">Yes, change level</button>
-        <button class="btn secondary" id="btnPhaseNo" type="button" data-testid="btn-phase-no">Keep this level</button>
-      </span>
-    </div>
+    <p class="muted small">Moving back a level is always allowed. Moving up uses Advance after 6 logged sessions.</p>
+    <h2>This week</h2>
+    <p class="muted small" id="calProgress" data-testid="cal-progress">0 days trained this week</p>
+    <div class="week-grid" id="weekGrid" data-testid="week-grid"></div>
   </section>
 
-  <section class="dashboard" aria-label="Session">
-    <div class="timer-panel">
-      <div class="panel-label">Session timer</div>
-      <div class="timer-row">
-        <div class="timer" id="timer" data-testid="timer">18:00</div>
-        <div class="timer-controls">
-          <button class="btn" id="btnStart" type="button" data-testid="btn-start">Start</button>
-          <button class="btn secondary" id="btnPause" type="button" data-testid="btn-pause" hidden>Pause</button>
-          <button class="btn" id="btnResume" type="button" data-testid="btn-resume" hidden>Resume</button>
-          <button class="btn" id="btnFinish" type="button" data-testid="btn-finish" hidden>Finish workout</button>
-          <button class="btn danger" id="btnClear" type="button" data-testid="btn-clear">Clear session</button>
-        </div>
-      </div>
-      <div class="session-date" id="sessionDate" data-testid="session-date">No active session</div>
-      <p class="session-plan" id="sessionPlan" data-testid="session-plan" hidden>
-        <span id="sessionLength" data-testid="session-length"></span>
-        <span id="sessionRounds" data-testid="session-rounds"></span>
-        <span id="sessionRest" data-testid="session-rest"></span>
-      </p>
-    </div>
-    <div class="progress-panel">
-      <div class="panel-label">Progress</div>
-      <div class="progress-top"><span class="progress-count" id="progressCount" data-testid="progress-count">0 / 25</span></div>
-      <div class="progress-track"><div class="progress-fill" id="progressFill" data-testid="progress-fill"></div></div>
-      <div class="progress-note" id="progressNote" data-testid="progress-note">Check off exercises as you finish them.</div>
-    </div>
-    <div class="clear-confirm" id="clearConfirm" data-testid="clear-confirm">
-      <span><strong>Clear the whole session?</strong> This wipes the timer, checkboxes, and progress.</span>
-      <span class="clear-actions">
-        <button class="btn danger" id="btnClearYes" type="button" data-testid="btn-clear-yes">Yes, clear it</button>
-        <button class="btn secondary" id="btnClearNo" type="button" data-testid="btn-clear-no">Keep going</button>
-      </span>
-    </div>
-    <div class="prompt-bar ok" id="finishConfirm" data-testid="finish-confirm">
-      <span><strong>All exercises checked.</strong> Finish the workout to log this day.</span>
-      <span class="prompt-actions">
-        <button class="btn" id="btnFinishNow" type="button" data-testid="btn-finish-now">Finish workout</button>
-      </span>
-    </div>
-    <div class="prompt-bar warn" id="expiryConfirm" data-testid="expiry-confirm">
-      <span><strong>Time is up.</strong> Your checkboxes are still here. Log this workout anyway, or discard it?</span>
-      <span class="prompt-actions">
-        <button class="btn" id="btnExpireLog" type="button" data-testid="btn-expire-log">Log anyway</button>
-        <button class="btn danger" id="btnExpireDiscard" type="button" data-testid="btn-expire-discard">Discard</button>
-      </span>
-    </div>
-    <div class="session-message" id="sessionMessage" data-testid="session-message"></div>
-  </section>
+  <p class="footer-note hide-when-active">
+    No accounts, no tracking, no names or photos. Progress is stored in this browser only. Demo videos load from YouTube's privacy-enhanced domain, one at a time.
+  </p>
+</main>
 
-  <div class="layout">
-    <main id="routine" aria-label="Routine" data-testid="routine"></main>
-    <aside class="sidebar">
-      <div class="side-card">
-        <h2>Weekly calendar</h2>
-        <p>Days you trained show a done mark. Press Start any day to train.</p>
-        <div class="cal-head">
-          <div><span class="cal-progress" id="calProgress" data-testid="cal-progress">0 days trained this week</span></div>
-        </div>
-        <div class="week-grid" id="weekGrid" data-testid="week-grid"></div>
-      </div>
-    </aside>
-  </div>
-
-  <section class="card demo-directory" id="demoVideos" aria-label="Demo videos">
-    <h2>All the moves</h2>
-    <p class="muted">Follow the steps on each card. Tap Watch demo to see the move. Videos were checked as kid friendly before being added.</p>
-    <ul class="demo-list" id="demoVideoList" data-testid="demo-list"></ul>
-  </section>
-
-  <footer class="footer-note">
-    <span>Kids Workout Coach: static app. No accounts, no tracking, no names or photos; everything is stored in your browser's local storage.</span>
-  </footer>
-
-</div>
-
-<footer class="disclaimer-footer" id="disclaimerFooter">
-  <p>Kids Workout Coach. Fun bodyweight workout, not medical advice. A grown-up should stay nearby.</p>
+<footer class="disclaimer-footer" id="disclaimerFooter" data-testid="disclaimer-footer">
+  <p>Fun bodyweight workout, not medical advice. A grown-up should stay nearby.</p>
 </footer>
 
-<div class="modal" id="infoPanel" data-testid="info-panel" hidden>
-  <button class="modal-backdrop" type="button" data-close-panel aria-label="Close info"></button>
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
-    <h2 id="infoTitle">How it's organized</h2>
-    <p id="blockNote" data-testid="block-note"></p>
-    <div class="modal-actions">
-      <button class="btn" id="btnInfoClose" type="button" data-testid="btn-info-close" data-close-panel>Close</button>
-    </div>
-  </div>
-</div>
-
-<script src="video-library.js"></script>
+<script src="session-engine.js"></script>
+<script src="session-screens.js"></script>
+<script src="program.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
